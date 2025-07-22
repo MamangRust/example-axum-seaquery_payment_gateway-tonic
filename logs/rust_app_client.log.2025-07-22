@@ -8,3 +8,11 @@
 {"timestamp":"2025-07-22T14:06:30.956996Z","level":"ERROR","fields":{"message":"Operation failed: Failed to register user hellloo@gmail.com: h2 protocol error: http2 error"},"target":"seaquery_client_payment_gateway::service::auth"}
 {"timestamp":"2025-07-22T14:41:03.735848Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
 {"timestamp":"2025-07-22T14:41:03.752648Z","level":"INFO","fields":{"message":"Operation completed successfully: User djangooo@gmail.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T17:27:35.370215Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T17:27:35.411628Z","level":"INFO","fields":{"message":"Operation completed successfully: User dragonknight@gmail.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T17:27:52.026458Z","level":"INFO","fields":{"message":"Starting operation: LoginUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T17:27:52.032943Z","level":"INFO","fields":{"message":"Operation completed successfully: User dragonknight@gmail.com logged in successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T17:28:14.669572Z","level":"INFO","fields":{"message":"Starting operation: GetUser"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-07-22T17:28:14.674265Z","level":"INFO","fields":{"message":"Operation completed successfully: User fetched successfully"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-07-22T17:28:52.480185Z","level":"INFO","fields":{"message":"Starting operation: GetAllUsers"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-07-22T17:28:52.509222Z","level":"INFO","fields":{"message":"Operation completed successfully: users retrieved successfully"},"target":"seaquery_client_payment_gateway::service::user"}

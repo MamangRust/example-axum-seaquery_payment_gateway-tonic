@@ -7,9 +7,18 @@ mod withdraw;
 
 use crate::state::AppState;
 use anyhow::Result;
+use axum::body::Body;
+use axum::extract::{DefaultBodyLimit, State};
+use axum::http::StatusCode;
+use axum::http::header::CONTENT_TYPE;
+use axum::response::{IntoResponse, Response};
+use axum::routing::get;
+use prometheus_client::encoding::text::encode;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use utoipa::{Modify, OpenApi, openapi::security::SecurityScheme};
+use tower_http::limit::RequestBodyLimitLayer;
+use utoipa::openapi::security::SecurityScheme;
+use utoipa::{Modify, OpenApi};
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -87,20 +96,50 @@ impl Modify for SecurityAddon {
     }
 }
 
+pub async fn metrics_handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+    let mut buffer = String::new();
+
+    let registry = state.registry.lock().await;
+
+    if let Err(e) = encode(&mut buffer, &registry) {
+        return Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::from(format!("Failed to encode metrics: {e}")))
+            .unwrap();
+    }
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(
+            CONTENT_TYPE,
+            "application/openmetrics-text; version=1.0.0; charset=utf-8",
+        )
+        .body(Body::from(buffer))
+        .unwrap()
+}
+
 pub struct AppRouter;
 
 impl AppRouter {
     pub async fn serve(port: u16, app_state: AppState) -> Result<()> {
         let shared_state = Arc::new(app_state);
 
-        let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
-            .merge(auth_routes(shared_state.clone()))
-            .merge(users_routes(shared_state.clone()))
-            .merge(saldos_routes(shared_state.clone()))
-            .merge(topup_routes(shared_state.clone()))
-            .merge(transfers_routes(shared_state.clone()))
-            .merge(withdraw_routes(shared_state.clone()))
-            .split_for_parts();
+        let mut router = OpenApiRouter::with_openapi(ApiDoc::openapi())
+            .route("/metrics", get(metrics_handler))
+            .with_state(shared_state.clone());
+
+        router = router.merge(auth_routes(shared_state.clone()));
+        router = router.merge(users_routes(shared_state.clone()));
+        router = router.merge(saldos_routes(shared_state.clone()));
+        router = router.merge(topup_routes(shared_state.clone()));
+        router = router.merge(transfers_routes(shared_state.clone()));
+        router = router.merge(withdraw_routes(shared_state.clone()));
+
+        let router = router
+            .layer(DefaultBodyLimit::disable())
+            .layer(RequestBodyLimitLayer::new(250 * 1024 * 1024));
+
+        let (router, api) = router.split_for_parts();
 
         let app =
             router.merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()));

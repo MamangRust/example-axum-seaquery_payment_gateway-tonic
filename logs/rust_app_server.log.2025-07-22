@@ -27,3 +27,17 @@
 {"timestamp":"2025-07-22T16:27:20.413243Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
 {"timestamp":"2025-07-22T16:27:20.413465Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
 {"timestamp":"2025-07-22T16:27:20.650844Z","level":"ERROR","fields":{"message":"","name":"BatchLogProcessor.ExportError","error":"Operation failed: export error: Status { code: Unavailable, message: \"tcp connect error\", source: Some(tonic::transport::Error(Transport, ConnectError(ConnectError(\"tcp connect error\", 172.20.0.7:4317, Os { code: 111, kind: ConnectionRefused, message: \"Connection refused\" })))) }"},"target":"opentelemetry_sdk"}
+{"timestamp":"2025-07-22T17:27:35.370920Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T17:27:35.410218Z","level":"INFO","fields":{"message":"Operation completed successfully: User registered successfully"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T17:27:52.026885Z","level":"INFO","fields":{"message":"Starting operation: LoginUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T17:27:52.027872Z","level":"INFO","fields":{"message":"Finding user by email: dragonknight@gmail.com"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:27:52.032590Z","level":"INFO","fields":{"message":"Operation completed successfully: Login successful"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T17:28:14.672288Z","level":"INFO","fields":{"message":"Starting operation: GetUser"},"target":"shared::service::user"}
+{"timestamp":"2025-07-22T17:28:14.672341Z","level":"INFO","fields":{"message":"Finding user by id: 3"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:28:14.673818Z","level":"INFO","fields":{"message":"successfully found user by id: 3"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:28:14.673852Z","level":"INFO","fields":{"message":"Operation completed successfully: User retrieved successfully"},"target":"shared::service::user"}
+{"timestamp":"2025-07-22T17:28:52.480626Z","level":"INFO","fields":{"message":"Starting operation: Getusers"},"target":"shared::service::user"}
+{"timestamp":"2025-07-22T17:28:52.481496Z","level":"INFO","fields":{"message":"Getting all users - page: 1, page_size: 1, search: None"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:28:52.483474Z","level":"INFO","fields":{"message":"Found 1 users"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:28:52.507579Z","level":"INFO","fields":{"message":"Found 1 users out of total 3"},"target":"shared::repository::user"}
+{"timestamp":"2025-07-22T17:28:52.508750Z","level":"INFO","fields":{"message":"Operation completed successfully: users retrieved from database"},"target":"shared::service::user"}
