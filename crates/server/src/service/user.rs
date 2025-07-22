@@ -12,6 +12,7 @@ use shared::{
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::{error, info};
 
 pub struct UserServiceImpl {
     pub state: Arc<AppState>,
@@ -29,6 +30,8 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<FindAllUserRequest>,
     ) -> Result<Response<ApiResponsesUserPaginated>, Status> {
+        info!("Finding all users");
+
         let req = request.get_ref();
 
         let myrequest = SharedFindAllUserRequest {
@@ -48,6 +51,8 @@ impl UserService for UserServiceImpl {
                 let user_responses: Vec<_> =
                     api_response.data.into_iter().map(Into::into).collect();
 
+                info!("User fetched successfully");
+
                 Ok(Response::new(ApiResponsesUserPaginated {
                     status: api_response.status,
                     message: api_response.message,
@@ -56,7 +61,7 @@ impl UserService for UserServiceImpl {
                 }))
             }
             Err(err) => {
-                tracing::error!("Failed to fetch users: {}", err);
+                error!("Failed to fetch users: {}", err.message);
                 Err(Status::internal("Failed to fetch users"))
             }
         }
@@ -66,6 +71,8 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<FindUserByIdRequest>,
     ) -> Result<Response<ApiResponseUserResponse>, Status> {
+        info!("Finding user by id");
+
         let id = request.into_inner().id;
 
         match self.state.di_container.user_service.get_user(id).await {
@@ -76,11 +83,17 @@ impl UserService for UserServiceImpl {
                         message: "User fetched successfully".into(),
                         data: Some(user.into()),
                     };
+
+                    info!("User fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("User not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch user: {}", err.message);
+                Err(Status::internal("Failed to fetch user"))
+            }
         }
     }
 
@@ -88,6 +101,8 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<CreateUserRequest>,
     ) -> Result<Response<ApiResponseUserResponse>, Status> {
+        info!("Creating user");
+
         let req = request.get_ref();
 
         let myrequest = RegisterRequest {
@@ -105,12 +120,18 @@ impl UserService for UserServiceImpl {
             .create_user(&myrequest)
             .await
         {
-            Ok(user) => Ok(Response::new(ApiResponseUserResponse {
-                status: user.status,
-                message: user.message,
-                data: Some(user.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(user) => {
+                info!("User created successfully");
+                Ok(Response::new(ApiResponseUserResponse {
+                    status: user.status,
+                    message: user.message,
+                    data: Some(user.data.into()),
+                }))
+            }
+            Err(err) => {
+                error!("Failed to create user: {}", err.message);
+                Err(Status::internal("Failed to create user"))
+            }
         }
     }
 
@@ -118,6 +139,8 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<UpdateUserRequest>,
     ) -> Result<Response<ApiResponseUserResponse>, Status> {
+        info!("Updating user");
+
         let req = request.get_ref();
 
         let body = SharedUpdateUserRequest {
@@ -136,12 +159,18 @@ impl UserService for UserServiceImpl {
             .update_user(&body)
             .await
         {
-            Ok(user) => Ok(Response::new(ApiResponseUserResponse {
-                status: user.status,
-                message: user.message,
-                data: Some(user.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(user) => {
+                info!("User updated successfully");
+                Ok(Response::new(ApiResponseUserResponse {
+                    status: user.status,
+                    message: user.message,
+                    data: Some(user.data.into()),
+                }))
+            }
+            Err(err) => {
+                error!("Failed to update user: {}", err.message);
+                Err(Status::internal("Failed to update user"))
+            }
         }
     }
 
@@ -149,14 +178,22 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<FindUserByIdRequest>,
     ) -> Result<Response<ApiResponseEmpty>, Status> {
+        info!("Deleting user");
+
         let id = request.into_inner().id;
 
         match self.state.di_container.user_service.delete_user(id).await {
-            Ok(user) => Ok(Response::new(ApiResponseEmpty {
-                status: user.status,
-                message: user.message,
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(user) => {
+                info!("User deleted successfully");
+                Ok(Response::new(ApiResponseEmpty {
+                    status: user.status,
+                    message: user.message,
+                }))
+            }
+            Err(err) => {
+                error!("Failed to delete user: {}", err.message);
+                Err(Status::internal("Failed to delete user"))
+            }
         }
     }
 }

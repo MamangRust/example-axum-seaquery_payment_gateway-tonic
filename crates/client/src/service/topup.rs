@@ -149,6 +149,11 @@ impl TopupServiceTrait for TopupService {
         &self,
         req: &DomainFindAllTopupRequest,
     ) -> Result<ApiResponsePagination<Vec<TopupResponse>>, ErrorResponse> {
+        info!(
+            "Retrieving topups (page: {}, size: {}, search: {})",
+            req.page, req.page_size, req.search
+        );
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -178,6 +183,12 @@ impl TopupServiceTrait for TopupService {
                     data: inner.data.into_iter().map(Into::into).collect(),
                     pagination: inner.pagination.unwrap_or_default().into(),
                 };
+
+                info!(
+                    "Retrieved topups (page: {}, size: {}): {}",
+                    req.page, req.page_size, response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -187,6 +198,11 @@ impl TopupServiceTrait for TopupService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve topups (page: {}, size: {}): {}",
+                    req.page, req.page_size, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -230,6 +246,8 @@ impl TopupServiceTrait for TopupService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Retrieved topup (id: {}): {}", id, response.message);
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -239,6 +257,11 @@ impl TopupServiceTrait for TopupService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve topup (id: {}): {id}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -288,6 +311,11 @@ impl TopupServiceTrait for TopupService {
                     data: Some(inner.data.into_iter().map(Into::into).collect()),
                 };
 
+                info!(
+                    "Retrieved topups (user_id: {user_id}): {}",
+                    response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -297,6 +325,11 @@ impl TopupServiceTrait for TopupService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve topup (user_id: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -317,6 +350,8 @@ impl TopupServiceTrait for TopupService {
         &self,
         user_id: i32,
     ) -> Result<ApiResponse<Option<TopupResponse>>, ErrorResponse> {
+        info!("Retrieving topup (user_id: {user_id})");
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -346,6 +381,8 @@ impl TopupServiceTrait for TopupService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Retrieved topup (user_id: {user_id}): {}", response.message);
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -355,6 +392,11 @@ impl TopupServiceTrait for TopupService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve topup (user_id: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -375,6 +417,11 @@ impl TopupServiceTrait for TopupService {
         &self,
         input: &DomainCreateTopupRequest,
     ) -> Result<ApiResponse<TopupResponse>, ErrorResponse> {
+        info!(
+            "Creating topup (user_id: {}, topup_no: {}, topup_amount: {}, topup_method: {})",
+            input.user_id, input.topup_no, input.topup_amount, input.topup_method
+        );
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "CreateTopup",
@@ -405,6 +452,11 @@ impl TopupServiceTrait for TopupService {
                     data: inner.data.into(),
                 };
 
+                info!(
+                    "Topup {} for user_id {} created successfully",
+                    input.topup_no, input.user_id
+                );
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -422,6 +474,11 @@ impl TopupServiceTrait for TopupService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to create topup {} for user_id {}: {}",
+                    input.topup_no, input.user_id, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -442,6 +499,11 @@ impl TopupServiceTrait for TopupService {
         &self,
         input: &DomainUpdateTopupRequest,
     ) -> Result<ApiResponse<TopupResponse>, ErrorResponse> {
+        info!(
+            "Updating topup (topup_id: {}, user_id: {}, topup_amount: {}, topup_method: {})",
+            input.topup_id, input.user_id, input.topup_amount, input.topup_method
+        );
+
         let method = Method::Put;
         let topup_id = input.topup_id;
         let user_id = input.user_id;
@@ -479,6 +541,8 @@ impl TopupServiceTrait for TopupService {
                     data: inner.data.into(),
                 };
 
+                info!("Topup updated successfully (ID: {topup_id}, user_id: {user_id})");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -493,6 +557,11 @@ impl TopupServiceTrait for TopupService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to update topup (ID: {topup_id}, user_id: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -510,6 +579,8 @@ impl TopupServiceTrait for TopupService {
     }
 
     async fn delete_topup(&self, id: i32) -> Result<ApiResponse<()>, ErrorResponse> {
+        info!("Deleting topup (id: {})", id);
+
         let method = Method::Delete;
         let tracing_ctx = self.start_tracing(
             "DeleteTopup",
@@ -532,6 +603,8 @@ impl TopupServiceTrait for TopupService {
                     data: (),
                 };
 
+                info!("Topup {id} deleted successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -546,6 +619,8 @@ impl TopupServiceTrait for TopupService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!("Failed to delete topup {}: {}", id, error_response.message);
 
                 self.complete_tracing_error(
                     &tracing_ctx,

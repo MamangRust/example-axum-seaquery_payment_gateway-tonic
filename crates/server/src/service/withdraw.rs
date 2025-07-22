@@ -15,6 +15,7 @@ use shared::{
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::{error, info};
 
 pub struct WithdrawServiceImpl {
     pub state: Arc<AppState>,
@@ -32,6 +33,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<FindAllWithdrawRequest>,
     ) -> Result<Response<ApiResponsesWithdrawPaginated>, Status> {
+        info!("Finding all withdraws");
+
         let req = request.get_ref();
 
         let body = SharedFindAllWithdrawRequest {
@@ -51,6 +54,8 @@ impl WithdrawService for WithdrawServiceImpl {
                 let withdraw_responses: Vec<_> =
                     api_response.data.into_iter().map(Into::into).collect();
 
+                info!("Withdraw fetched successfully");
+
                 let reply = ApiResponsesWithdrawPaginated {
                     status: api_response.status,
                     message: api_response.message,
@@ -60,7 +65,11 @@ impl WithdrawService for WithdrawServiceImpl {
 
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch withdraws: {}", err.message);
+
+                Err(Status::internal("Failed to fetch withdraws"))
+            }
         }
     }
 
@@ -68,6 +77,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<FindWithdrawByIdRequest>,
     ) -> Result<Response<ApiResponseWithdrawResponse>, Status> {
+        info!("Finding withdraw by id");
+
         let withdraw_id = request.into_inner().id;
 
         match self
@@ -78,14 +89,24 @@ impl WithdrawService for WithdrawServiceImpl {
             .await
         {
             Ok(api_response) => match api_response.data {
-                Some(data) => Ok(Response::new(ApiResponseWithdrawResponse {
-                    status: api_response.status,
-                    message: api_response.message,
-                    data: Some(data.into()),
-                })),
+                Some(data) => {
+                    let reply = ApiResponseWithdrawResponse {
+                        status: api_response.status,
+                        message: api_response.message,
+                        data: Some(data.into()),
+                    };
+
+                    info!("Withdraw fetched successfully");
+
+                    Ok(Response::new(reply))
+                }
                 None => Err(Status::not_found("Withdraw not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch withdraw: {}", err.message);
+
+                Err(Status::internal("Failed to fetch withdraw"))
+            }
         }
     }
 
@@ -93,6 +114,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<FindWithdrawByUserIdRequest>,
     ) -> Result<Response<ApiResponseWithdrawResponse>, Status> {
+        info!("Finding withdraw by user id");
+
         let user_id = request.into_inner().user_id;
 
         match self
@@ -110,11 +133,17 @@ impl WithdrawService for WithdrawServiceImpl {
                         data: Some(data.into()),
                     };
 
+                    info!("Withdraw fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Withdraw not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch withdraw: {}", err.message);
+
+                Err(Status::internal("Failed to fetch withdraw"))
+            }
         }
     }
 
@@ -122,6 +151,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<FindWithdrawByUserIdRequest>,
     ) -> Result<Response<ApiResponsesWithdrawResponse>, Status> {
+        info!("Finding withdraw by user id");
+
         let id = request.into_inner().user_id;
 
         match self
@@ -145,9 +176,15 @@ impl WithdrawService for WithdrawServiceImpl {
                     data,
                 };
 
+                info!("Topup fetched successfully");
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch topup: {}", err.message);
+
+                Err(Status::internal("Failed to fetch topup"))
+            }
         }
     }
 
@@ -155,6 +192,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<CreateWithdrawRequest>,
     ) -> Result<Response<ApiResponseWithdrawResponse>, Status> {
+        info!("Creating withdraw");
+
         let req = request.get_ref();
 
         let withdraw_time = DateTime::parse_from_rfc3339(&req.withdraw_time)
@@ -174,12 +213,22 @@ impl WithdrawService for WithdrawServiceImpl {
             .create_withdraw(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseWithdrawResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseWithdrawResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Withdraw created successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to create withdraw: {}", err.message);
+
+                Err(Status::internal("Failed to create withdraw"))
+            }
         }
     }
 
@@ -187,6 +236,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<UpdateWithdrawRequest>,
     ) -> Result<Response<ApiResponseWithdrawResponse>, Status> {
+        info!("Updating withdraw");
+
         let req = request.get_ref();
 
         let withdraw_time = DateTime::parse_from_rfc3339(&req.withdraw_time)
@@ -207,12 +258,22 @@ impl WithdrawService for WithdrawServiceImpl {
             .update_withdraw(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseWithdrawResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseWithdrawResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Withdraw updated successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to update withdraw: {}", err.message);
+
+                Err(Status::internal("Failed to update withdraw"))
+            }
         }
     }
 
@@ -220,6 +281,8 @@ impl WithdrawService for WithdrawServiceImpl {
         &self,
         request: Request<FindWithdrawByIdRequest>,
     ) -> Result<Response<ApiResponseEmpty>, Status> {
+        info!("Deleting withdraw");
+
         let withdraw_id = request.into_inner().id;
 
         match self
@@ -229,11 +292,17 @@ impl WithdrawService for WithdrawServiceImpl {
             .delete_withdraw(withdraw_id)
             .await
         {
-            Ok(user) => Ok(Response::new(ApiResponseEmpty {
-                status: user.status,
-                message: user.message,
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(user) => {
+                info!("Withdraw deleted successfully");
+                Ok(Response::new(ApiResponseEmpty {
+                    status: user.status,
+                    message: user.message,
+                }))
+            }
+            Err(err) => {
+                error!("Failed to delete withdraw: {}", err.message);
+                Err(Status::internal("Failed to delete withdraw"))
+            }
         }
     }
 }

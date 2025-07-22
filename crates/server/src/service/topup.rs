@@ -14,6 +14,7 @@ use shared::{
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::{error, info};
 
 pub struct TopupServiceImpl {
     pub state: Arc<AppState>,
@@ -33,6 +34,11 @@ impl TopupService for TopupServiceImpl {
     ) -> Result<Response<ApiResponsesTopupPaginated>, Status> {
         let req = request.get_ref();
 
+        info!(
+            "Finding all topup, page: {}, page_size: {}, search: {}",
+            req.page, req.page_size, req.search
+        );
+
         let my_request = SharedFindAllTopupRequest {
             page: req.page,
             page_size: req.page_size,
@@ -50,6 +56,8 @@ impl TopupService for TopupServiceImpl {
                 let topup_responses: Vec<_> =
                     api_response.data.into_iter().map(Into::into).collect();
 
+                info!("Topup fetched successfully");
+
                 Ok(Response::new(ApiResponsesTopupPaginated {
                     status: api_response.status,
                     message: api_response.message,
@@ -58,7 +66,8 @@ impl TopupService for TopupServiceImpl {
                 }))
             }
             Err(err) => {
-                tracing::error!("Failed to fetch topups: {}", err);
+                error!("Failed to fetch topups: {}", err.message);
+
                 Err(Status::internal("Failed to fetch topups"))
             }
         }
@@ -70,6 +79,8 @@ impl TopupService for TopupServiceImpl {
     ) -> Result<Response<ApiResponseTopupResponse>, Status> {
         let id = request.into_inner().id;
 
+        info!("Finding topup by id: {}", id);
+
         match self.state.di_container.topup_service.get_topup(id).await {
             Ok(api_response) => match api_response.data {
                 Some(topup) => {
@@ -78,11 +89,18 @@ impl TopupService for TopupServiceImpl {
                         message: "Topup fetched successfully".into(),
                         data: Some(topup.into()),
                     };
+
+                    info!("Topup fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Topup not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch topup: {}", err.message);
+
+                Err(Status::internal("Failed to fetch topup"))
+            }
         }
     }
 
@@ -91,6 +109,8 @@ impl TopupService for TopupServiceImpl {
         request: Request<FindTopupByUserIdRequest>,
     ) -> Result<Response<ApiResponseTopupResponse>, Status> {
         let user_id = request.into_inner().user_id;
+
+        info!("Finding topup by user id: {}", user_id);
 
         match self
             .state
@@ -106,11 +126,18 @@ impl TopupService for TopupServiceImpl {
                         message: "Topup fetched successfully".into(),
                         data: Some(topup.into()),
                     };
+
+                    info!("Topup fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Topup not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch topup: {}", err.message);
+
+                Err(Status::internal("Failed to fetch topup"))
+            }
         }
     }
 
@@ -118,11 +145,15 @@ impl TopupService for TopupServiceImpl {
         &self,
         request: Request<FindTopupByUserIdRequest>,
     ) -> Result<Response<ApiResponsesTopupResponse>, Status> {
+        let request = request.into_inner();
+
+        info!("Finding topup by user id: {}", request.user_id);
+
         match self
             .state
             .di_container
             .topup_service
-            .get_topup_users(request.into_inner().user_id)
+            .get_topup_users(request.user_id)
             .await
         {
             Ok(api_response) => {
@@ -149,6 +180,8 @@ impl TopupService for TopupServiceImpl {
         &self,
         request: Request<CreateTopupRequest>,
     ) -> Result<Response<ApiResponseTopupResponse>, Status> {
+        info!("Creating topup");
+
         let req = request.get_ref();
 
         let body = SharedCreateTopupRequest {
@@ -165,12 +198,22 @@ impl TopupService for TopupServiceImpl {
             .create_topup(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseTopupResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseTopupResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Topup created successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to create topup: {}", err.message);
+
+                Err(Status::internal("Failed to create topup"))
+            }
         }
     }
 
@@ -178,6 +221,8 @@ impl TopupService for TopupServiceImpl {
         &self,
         request: Request<UpdateTopupRequest>,
     ) -> Result<Response<ApiResponseTopupResponse>, Status> {
+        info!("Updating topup");
+
         let req = request.get_ref();
 
         let body = SharedUpdateTopupRequest {
@@ -194,12 +239,22 @@ impl TopupService for TopupServiceImpl {
             .update_topup(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseTopupResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseTopupResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Topup updated successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to update topup: {}", err.message);
+
+                Err(Status::internal("Failed to update topup"))
+            }
         }
     }
 
@@ -210,11 +265,18 @@ impl TopupService for TopupServiceImpl {
         let id = request.into_inner().id;
 
         match self.state.di_container.topup_service.delete_topup(id).await {
-            Ok(user) => Ok(Response::new(ApiResponseEmpty {
-                status: user.status,
-                message: user.message,
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(_user) => {
+                info!("Topup deleted successfully");
+
+                Ok(Response::new(ApiResponseEmpty {
+                    status: "success".into(),
+                    message: "Topup deleted successfully".into(),
+                }))
+            }
+            Err(err) => {
+                error!("Failed to delete topup: {}", err);
+                Err(Status::internal("Failed to delete topup"))
+            }
         }
     }
 }

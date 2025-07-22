@@ -14,6 +14,7 @@ use shared::{
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::{error, info};
 
 pub struct SaldoServiceImpl {
     state: Arc<AppState>,
@@ -31,6 +32,8 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<FindAllSaldoRequest>,
     ) -> Result<Response<ApiResponsesSaldoPaginated>, Status> {
+        info!("Finding all saldo");
+
         let req = request.get_ref();
 
         let my_request = SharedFindAllSaldoRequest {
@@ -50,6 +53,8 @@ impl SaldoService for SaldoServiceImpl {
                 let saldo_responses: Vec<_> =
                     api_response.data.into_iter().map(Into::into).collect();
 
+                info!("Saldo fetched successfully");
+
                 Ok(Response::new(ApiResponsesSaldoPaginated {
                     status: api_response.status,
                     message: api_response.message,
@@ -58,7 +63,7 @@ impl SaldoService for SaldoServiceImpl {
                 }))
             }
             Err(err) => {
-                tracing::error!("Failed to fetch saldo: {}", err);
+                error!("Failed to fetch saldo: {}", err);
                 Err(Status::internal("Failed to fetch saldo"))
             }
         }
@@ -68,6 +73,8 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<FindSaldoByIdRequest>,
     ) -> Result<Response<ApiResponseSaldoResponse>, Status> {
+        info!("Finding saldo by id");
+
         let id = request.into_inner().id;
 
         match self.state.di_container.saldo_service.get_saldo(id).await {
@@ -78,11 +85,16 @@ impl SaldoService for SaldoServiceImpl {
                         message: "Saldo fetched successfully".into(),
                         data: Some(saldo.into()),
                     };
+
+                    info!("Saldo fetched successfully");
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Saldo not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch saldo: {}", err);
+                Err(Status::internal("Failed to fetch saldo"))
+            }
         }
     }
 
@@ -90,6 +102,8 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<FindSaldoByUserIdRequest>,
     ) -> Result<Response<ApiResponseSaldoResponse>, Status> {
+        info!("Finding saldo by user id");
+
         let user_id = request.into_inner().user_id;
 
         match self
@@ -101,6 +115,8 @@ impl SaldoService for SaldoServiceImpl {
         {
             Ok(api_response) => match api_response.data {
                 Some(saldo) => {
+                    info!("Saldo fetched successfully");
+
                     let reply = ApiResponseSaldoResponse {
                         status: "success".into(),
                         message: "Saldo fetched successfully".into(),
@@ -110,7 +126,10 @@ impl SaldoService for SaldoServiceImpl {
                 }
                 None => Err(Status::not_found("Saldo not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch saldo: {err}");
+                Err(Status::internal("Failed to fetch saldo"))
+            }
         }
     }
 
@@ -118,7 +137,11 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<FindSaldoByUserIdRequest>,
     ) -> Result<Response<ApiResponsesSaldoResponse>, Status> {
-        let user_id = request.into_inner().user_id;
+        let request = request.into_inner();
+
+        info!("Finding saldo by user id : {}", request.user_id);
+
+        let user_id = request.user_id;
 
         match self
             .state
@@ -141,9 +164,14 @@ impl SaldoService for SaldoServiceImpl {
                     data: data_vec,
                 };
 
+                info!("Saldo fetched successfully for user id : {}", user_id);
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch saldo: {err}");
+                Err(Status::internal("Failed to fetch saldo"))
+            }
         }
     }
 
@@ -151,6 +179,8 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<CreateSaldoRequest>,
     ) -> Result<Response<ApiResponseSaldoResponse>, Status> {
+        info!("Creating saldo for user id : {}", request.get_ref().user_id);
+
         let req = request.get_ref();
 
         let body = SharedCreateSaldoRequest {
@@ -165,12 +195,21 @@ impl SaldoService for SaldoServiceImpl {
             .create_saldo(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseSaldoResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseSaldoResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Saldo created successfully for user id : {}", req.user_id);
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to create saldo: {}", err);
+                Err(Status::internal("Failed to create saldo"))
+            }
         }
     }
 
@@ -178,6 +217,8 @@ impl SaldoService for SaldoServiceImpl {
         &self,
         request: Request<UpdateSaldoRequest>,
     ) -> Result<Response<ApiResponseSaldoResponse>, Status> {
+        info!("Updating saldo for user id : {}", request.get_ref().user_id);
+
         let req = request.get_ref();
 
         let body = SharedUpdateSaldoRequest {
@@ -195,12 +236,21 @@ impl SaldoService for SaldoServiceImpl {
             .update_saldo(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseSaldoResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseSaldoResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Saldo updated successfully for user id : {}", req.user_id);
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to update saldo: {}", err);
+                Err(Status::internal("Failed to update saldo"))
+            }
         }
     }
 
@@ -211,11 +261,18 @@ impl SaldoService for SaldoServiceImpl {
         let id = request.into_inner().id;
 
         match self.state.di_container.saldo_service.delete_saldo(id).await {
-            Ok(user) => Ok(Response::new(ApiResponseEmpty {
-                status: user.status,
-                message: user.message,
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(_user) => {
+                info!("Saldo deleted successfully");
+
+                Ok(Response::new(ApiResponseEmpty {
+                    status: "success".into(),
+                    message: "Saldo deleted successfully".into(),
+                }))
+            }
+            Err(err) => {
+                error!("Failed to delete saldo: {}", err);
+                Err(Status::internal("Failed to delete saldo"))
+            }
         }
     }
 }

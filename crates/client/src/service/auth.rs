@@ -142,6 +142,8 @@ impl AuthServiceTrait for AuthService {
         &self,
         request_data: &RegisterDomainRequest,
     ) -> Result<ApiResponse<UserResponse>, ErrorResponse> {
+        info!("Registering user: {}", request_data.email);
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "RegisterUser",
@@ -177,6 +179,8 @@ impl AuthServiceTrait for AuthService {
                     data: inner.data.into(),
                 };
 
+                info!("User {} registered successfully", request_data.email);
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -191,6 +195,11 @@ impl AuthServiceTrait for AuthService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to register user {}: {}",
+                    request_data.email, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -211,6 +220,8 @@ impl AuthServiceTrait for AuthService {
         &self,
         request_data: &LoginDomainRequest,
     ) -> Result<ApiResponse<String>, ErrorResponse> {
+        info!("Logging in user: {}", request_data.email);
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "LoginUser",
@@ -242,6 +253,8 @@ impl AuthServiceTrait for AuthService {
                     data: inner.data,
                 };
 
+                info!("User {} logged in successfully", request_data.email);
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -256,6 +269,11 @@ impl AuthServiceTrait for AuthService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to login user {}: {}",
+                    request_data.email, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -300,6 +318,8 @@ impl AuthServiceTrait for AuthService {
                     data: inner.data.into(),
                 };
 
+                info!("User profile {id} retrieved successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -315,12 +335,17 @@ impl AuthServiceTrait for AuthService {
                     message: status.message().to_string(),
                 };
 
+                error!(
+                    "Failed to retrieve user profile {id}: {}",
+                    error_response.message
+                );
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
                     &format!(
-                        "Failed to retrieve user profile {}: {}",
-                        id, error_response.message
+                        "Failed to retrieve user profile {id}: {}",
+                        error_response.message
                     ),
                 )
                 .await;

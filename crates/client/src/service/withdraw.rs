@@ -150,6 +150,11 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         req: &DomainFindAllWithdrawRequest,
     ) -> Result<ApiResponsePagination<Vec<WithdrawResponse>>, ErrorResponse> {
+        info!(
+            "Getting all withdraws (page: {}, size: {}, search: {})",
+            req.page, req.page_size, req.search
+        );
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetAllWithdraws",
@@ -179,6 +184,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     pagination: inner.pagination.unwrap_or_default().into(),
                 };
 
+                info!(
+                    "Withdraws retrieved successfully (page: {}, size: {})",
+                    req.page, req.page_size
+                );
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -196,6 +206,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve withdraws (page: {}, size: {}): {}",
+                    req.page, req.page_size, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -216,6 +231,8 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<WithdrawResponse>>, ErrorResponse> {
+        info!("Getting withdraw {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetWithdrawById",
@@ -238,6 +255,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Withdraw {id} found successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -252,6 +271,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!("Failed to find withdraw {id}: {}", error_response.message);
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -269,6 +290,8 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<Vec<WithdrawResponse>>>, ErrorResponse> {
+        info!("Getting withdraws for user {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "FindWithdrawByUserId",
@@ -297,6 +320,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: Some(inner.data.into_iter().map(Into::into).collect()),
                 };
 
+                info!("Withdraws for user {id} retrieved successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -311,6 +336,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve withdraws for user {id}: {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -331,6 +361,8 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<WithdrawResponse>>, ErrorResponse> {
+        info!("Getting withdraw for user {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetWithdrawUser",
@@ -359,6 +391,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Withdraw for user {id} found successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -373,6 +407,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to find withdraw for user {id}: {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -393,6 +432,8 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         input: &DomainCreateWithdrawRequest,
     ) -> Result<ApiResponse<WithdrawResponse>, ErrorResponse> {
+        info!("Creating withdraw for user_id {}", input.user_id);
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "CreateWithdraw",
@@ -422,6 +463,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: inner.data.into(),
                 };
 
+                info!(
+                    "Withdraw for user_id {} created successfully",
+                    input.user_id
+                );
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -439,6 +485,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to create withdraw for user_id {}: {}",
+                    input.user_id, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -459,6 +510,8 @@ impl WithdrawServiceTrait for WithdrawService {
         &self,
         input: &DomainUpdateWithdrawRequest,
     ) -> Result<ApiResponse<WithdrawResponse>, ErrorResponse> {
+        info!("Updating withdraw for withdraw_id {}", input.withdraw_id);
+
         let method = Method::Put;
         let withdraw_id = input.withdraw_id;
         let user_id = input.user_id;
@@ -496,6 +549,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: inner.data.into(),
                 };
 
+                info!("Withdraw updated successfully (ID: {withdraw_id}, user_id: {user_id})");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -513,6 +568,11 @@ impl WithdrawServiceTrait for WithdrawService {
                     message: status.message().to_string(),
                 };
 
+                error!(
+                    "Failed to update withdraw (ID: {withdraw_id}, user_id: {user_id}): {}",
+                    error_response.message
+                );
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
@@ -529,6 +589,8 @@ impl WithdrawServiceTrait for WithdrawService {
     }
 
     async fn delete_withdraw(&self, id: i32) -> Result<ApiResponse<()>, ErrorResponse> {
+        info!("Deleting withdraw {id}");
+
         let method = Method::Delete;
         let tracing_ctx = self.start_tracing(
             "DeleteWithdraw",
@@ -551,6 +613,8 @@ impl WithdrawServiceTrait for WithdrawService {
                     data: (),
                 };
 
+                info!("Withdraw {id} deleted successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -566,13 +630,12 @@ impl WithdrawServiceTrait for WithdrawService {
                     message: status.message().to_string(),
                 };
 
+                error!("Failed to delete withdraw {id}: {}", error_response.message);
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
-                    &format!(
-                        "Failed to delete withdraw {}: {}",
-                        id, error_response.message
-                    ),
+                    &format!("Failed to delete withdraw {id}: {}", error_response.message),
                 )
                 .await;
 

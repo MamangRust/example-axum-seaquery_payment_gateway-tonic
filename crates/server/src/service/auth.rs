@@ -12,6 +12,7 @@ use shared::{
     },
     state::AppState,
 };
+use tracing::{error, info};
 
 #[derive(Debug, Clone)]
 pub struct AuthServiceImpl {
@@ -30,6 +31,8 @@ impl AuthService for AuthServiceImpl {
         &self,
         request: Request<LoginRequest>,
     ) -> Result<Response<ApiResponseLogin>, Status> {
+        info!("Logging in user {}", request.get_ref().email);
+
         let req = request.into_inner();
 
         let domain_req = LoginDomainRequest {
@@ -50,9 +53,15 @@ impl AuthService for AuthServiceImpl {
                     message: api_response.message,
                     data: api_response.data,
                 };
+
+                info!("User logged in successfully");
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::unauthenticated(err.message)),
+            Err(err) => {
+                error!("Error logging in user: {}", err.message);
+                Err(Status::internal(err.message))
+            }
         }
     }
 
@@ -60,6 +69,8 @@ impl AuthService for AuthServiceImpl {
         &self,
         request: Request<RegisterRequest>,
     ) -> Result<Response<ApiResponseRegister>, Status> {
+        info!("Registering user {}", request.get_ref().email);
+
         let req = request.into_inner();
 
         let domain_req = RegisterDomainRequest {
@@ -84,9 +95,15 @@ impl AuthService for AuthServiceImpl {
                     message: api_response.message,
                     data: user,
                 };
+
+                info!("User registered successfully");
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Error registering user: {}", err.message);
+                Err(Status::internal(err.message))
+            }
         }
     }
 
@@ -94,6 +111,8 @@ impl AuthService for AuthServiceImpl {
         &self,
         request: Request<GetMeRequest>,
     ) -> Result<Response<ApiResponseGetMe>, Status> {
+        info!("Getting user profile");
+
         let req = request.into_inner();
 
         match self.state.di_container.auth_service.get_me(req.id).await {
@@ -103,9 +122,15 @@ impl AuthService for AuthServiceImpl {
                     message: "User fetched successfully".into(),
                     data: Some(api_response.data.into()),
                 };
+
+                info!("User fetched successfully");
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Error fetching user: {}", err.message);
+                Err(Status::internal(err.message))
+            }
         }
     }
 }

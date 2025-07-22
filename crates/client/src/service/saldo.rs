@@ -149,6 +149,11 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         req: &DomainFindAllSaldoRequest,
     ) -> Result<ApiResponsePagination<Vec<SaldoResponse>>, ErrorResponse> {
+        info!(
+            "Retrieving all saldos (page: {}, size: {} search: {})",
+            req.page, req.page_size, req.search
+        );
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetAllSaldos",
@@ -178,6 +183,11 @@ impl SaldoServiceTrait for SaldoService {
                     pagination: inner.pagination.unwrap_or_default().into(),
                 };
 
+                info!(
+                    "Saldos retrieved successfully (page: {}, size: {})",
+                    req.page, req.page_size
+                );
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -195,6 +205,11 @@ impl SaldoServiceTrait for SaldoService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve saldos (page: {}, size: {}): {}",
+                    req.page, req.page_size, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -215,6 +230,8 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<SaldoResponse>>, ErrorResponse> {
+        info!("Get saldo request: {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetSaldoById",
@@ -237,6 +254,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Saldo {id} found successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -251,6 +270,8 @@ impl SaldoServiceTrait for SaldoService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!("Failed to find saldo {id}: {}", error_response.message);
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -268,6 +289,8 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<Vec<SaldoResponse>>>, ErrorResponse> {
+        info!("Get saldo users request: {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "FindSaldoByUserId",
@@ -296,6 +319,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: Some(inner.data.into_iter().map(Into::into).collect()),
                 };
 
+                info!("Saldo for user {id} retrieved successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -310,6 +335,11 @@ impl SaldoServiceTrait for SaldoService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve saldo for user {id}: {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -330,6 +360,8 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<SaldoResponse>>, ErrorResponse> {
+        info!("Get saldo user request: {id}");
+
         let method = Method::Get;
         let tracing_ctx = self.start_tracing(
             "GetSaldoUser",
@@ -358,6 +390,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Saldo for user {id} found successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -372,6 +406,11 @@ impl SaldoServiceTrait for SaldoService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to find saldo for user {id}: {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -392,6 +431,8 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         input: &DomainCreateSaldoRequest,
     ) -> Result<ApiResponse<SaldoResponse>, ErrorResponse> {
+        info!("Create saldo request: {input:#?}");
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "CreateSaldo",
@@ -418,6 +459,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: inner.data.into(),
                 };
 
+                info!("Saldo for user_id {} created successfully", input.user_id);
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -432,6 +475,11 @@ impl SaldoServiceTrait for SaldoService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to create saldo for user_id {}: {}",
+                    input.user_id, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -452,6 +500,8 @@ impl SaldoServiceTrait for SaldoService {
         &self,
         input: &DomainUpdateSaldoRequest,
     ) -> Result<ApiResponse<SaldoResponse>, ErrorResponse> {
+        info!("Update saldo request: {input:#?}");
+
         let method = Method::Put;
         let saldo_id = input.saldo_id;
         let user_id = input.user_id;
@@ -486,6 +536,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: inner.data.into(),
                 };
 
+                info!("Saldo updated successfully (ID: {saldo_id}, user_id: {user_id})");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -517,6 +569,8 @@ impl SaldoServiceTrait for SaldoService {
     }
 
     async fn delete_saldo(&self, id: i32) -> Result<ApiResponse<()>, ErrorResponse> {
+        info!("Delete saldo request: {id}");
+
         let method = Method::Delete;
         let tracing_ctx = self.start_tracing(
             "DeleteSaldo",
@@ -539,6 +593,8 @@ impl SaldoServiceTrait for SaldoService {
                     data: (),
                 };
 
+                info!("Saldo {id} deleted successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -554,10 +610,12 @@ impl SaldoServiceTrait for SaldoService {
                     message: status.message().to_string(),
                 };
 
+                error!("Failed to delete saldo {id}: {}", error_response.message);
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
-                    &format!("Failed to delete saldo {}: {}", id, error_response.message),
+                    &format!("Failed to delete saldo {id}: {}", error_response.message),
                 )
                 .await;
 

@@ -149,6 +149,11 @@ impl UserServiceTrait for UserService {
         &self,
         req: &DomainFindAllUserRequest,
     ) -> Result<ApiResponsePagination<Vec<UserResponse>>, ErrorResponse> {
+        info!(
+            "Retrieving users (page: {}, size: {}, search: {})",
+            req.page, req.page_size, req.search
+        );
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -178,6 +183,12 @@ impl UserServiceTrait for UserService {
                     data: inner.data.into_iter().map(Into::into).collect(),
                     pagination: inner.pagination.unwrap_or_default().into(),
                 };
+
+                info!(
+                    "Retrieved users (page: {}, size: {}): {}",
+                    req.page, req.page_size, response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -187,6 +198,11 @@ impl UserServiceTrait for UserService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve users (page: {}, size: {}): {}",
+                    req.page, req.page_size, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -204,6 +220,8 @@ impl UserServiceTrait for UserService {
     }
 
     async fn get_user(&self, id: i32) -> Result<ApiResponse<Option<UserResponse>>, ErrorResponse> {
+        info!("Retrieving user (id: {id})");
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -226,6 +244,8 @@ impl UserServiceTrait for UserService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Retrieved user (id: {id}): {}", response.message);
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -236,12 +256,17 @@ impl UserServiceTrait for UserService {
                     message: err.message().to_string(),
                 };
 
+                error!(
+                    "Failed to retrieve user (id: {id}): {}",
+                    error_response.message
+                );
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
                     &format!(
-                        "Failed to retrieve user (id: {}): {}",
-                        id, error_response.message
+                        "Failed to retrieve user (id: {id}): {}",
+                        error_response.message
                     ),
                 )
                 .await;
@@ -255,6 +280,8 @@ impl UserServiceTrait for UserService {
         &self,
         input: &DomainCreateUserRequest,
     ) -> Result<ApiResponse<UserResponse>, ErrorResponse> {
+        info!("Creating user (email: {})", input.email);
+
         let method = Method::Post;
 
         let tracing_ctx = self.start_tracing(
@@ -285,6 +312,8 @@ impl UserServiceTrait for UserService {
                     data: inner.data.into(),
                 };
 
+                info!("User {} registered successfully", input.email);
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -299,6 +328,11 @@ impl UserServiceTrait for UserService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to register user {}: {}",
+                    input.email, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -319,6 +353,8 @@ impl UserServiceTrait for UserService {
         &self,
         input: &DomainUpdateUserRequest,
     ) -> Result<ApiResponse<UserResponse>, ErrorResponse> {
+        info!("Updating user (id: {})", input.id);
+
         let method = Method::Put;
         let user_id = input.id;
 
@@ -352,6 +388,8 @@ impl UserServiceTrait for UserService {
                     data: inner.data.into(),
                 };
 
+                info!("User updated successfully (ID: {user_id})");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -366,6 +404,11 @@ impl UserServiceTrait for UserService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to update user (ID: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -383,6 +426,8 @@ impl UserServiceTrait for UserService {
     }
 
     async fn delete_user(&self, id: i32) -> Result<ApiResponse<()>, ErrorResponse> {
+        info!("Deleting user (id: {id})");
+
         let method = Method::Delete;
         let tracing_ctx = self.start_tracing(
             "DeleteUser",
@@ -405,6 +450,8 @@ impl UserServiceTrait for UserService {
                     data: (),
                 };
 
+                info!("User {id} deleted successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -420,10 +467,12 @@ impl UserServiceTrait for UserService {
                     message: status.message().to_string(),
                 };
 
+                error!("Failed to delete user {id}: {}", error_response.message);
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
-                    &format!("Failed to delete user {}: {}", id, error_response.message),
+                    &format!("Failed to delete user {id}: {}", error_response.message),
                 )
                 .await;
 

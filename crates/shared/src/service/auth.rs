@@ -165,6 +165,8 @@ impl AuthServiceTrait for AuthService {
         &self,
         input: &RegisterRequest,
     ) -> Result<ApiResponse<UserResponse>, ErrorResponse> {
+        info!("Registering user");
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "RegisterUser",

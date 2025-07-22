@@ -14,6 +14,7 @@ use shared::{
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::{error, info};
 
 pub struct TransferServiceImpl {
     pub state: Arc<AppState>,
@@ -50,6 +51,8 @@ impl TransferService for TransferServiceImpl {
                 let transfer_responses: Vec<_> =
                     api_response.data.into_iter().map(Into::into).collect();
 
+                info!("Transfer fetched successfully");
+
                 Ok(Response::new(ApiResponsesTransferPaginated {
                     status: api_response.status,
                     message: api_response.message,
@@ -57,7 +60,10 @@ impl TransferService for TransferServiceImpl {
                     pagination: Some(api_response.pagination.into()),
                 }))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch transfer: {}", err.message);
+                Err(Status::internal(err.message))
+            }
         }
     }
 
@@ -66,6 +72,8 @@ impl TransferService for TransferServiceImpl {
         request: Request<FindTransferByIdRequest>,
     ) -> Result<Response<ApiResponseTransferResponse>, Status> {
         let id = request.into_inner().id;
+
+        info!("Finding transfer by id: {}", id);
 
         match self
             .state
@@ -81,11 +89,18 @@ impl TransferService for TransferServiceImpl {
                         message: "Transfer fetched successfully".into(),
                         data: Some(transfer.into()),
                     };
+
+                    info!("Transfer fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Transfer not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch transfer: {}", err.message);
+
+                Err(Status::internal("Failed to fetch transfer"))
+            }
         }
     }
 
@@ -94,6 +109,8 @@ impl TransferService for TransferServiceImpl {
         request: Request<FindTransferByUserIdRequest>,
     ) -> Result<Response<ApiResponseTransferResponse>, Status> {
         let user_id = request.into_inner().user_id;
+
+        info!("Finding transfer by user id: {}", user_id);
 
         match self
             .state
@@ -109,11 +126,18 @@ impl TransferService for TransferServiceImpl {
                         message: "Transfer fetched successfully".into(),
                         data: Some(transfer.into()),
                     };
+
+                    info!("Transfer fetched successfully");
+
                     Ok(Response::new(reply))
                 }
                 None => Err(Status::not_found("Transfer not found")),
             },
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch transfer: {}", err.message);
+
+                Err(Status::internal("Failed to fetch transfer"))
+            }
         }
     }
 
@@ -122,6 +146,8 @@ impl TransferService for TransferServiceImpl {
         request: Request<FindTransferByUserIdRequest>,
     ) -> Result<Response<ApiResponsesTransferResponse>, Status> {
         let user_id = request.into_inner().user_id;
+
+        info!("Finding transfer by user id : {}", user_id);
 
         match self
             .state
@@ -144,9 +170,15 @@ impl TransferService for TransferServiceImpl {
                     data: data_vec,
                 };
 
+                info!("Transfer fetched successfully");
+
                 Ok(Response::new(reply))
             }
-            Err(err) => Err(Status::internal(err.message)),
+            Err(err) => {
+                error!("Failed to fetch transfer: {}", err.message);
+
+                Err(Status::internal("Failed to fetch transfer"))
+            }
         }
     }
 
@@ -154,6 +186,8 @@ impl TransferService for TransferServiceImpl {
         &self,
         request: Request<CreateTransferRequest>,
     ) -> Result<Response<ApiResponseTransferResponse>, Status> {
+        info!("Creating transfer");
+
         let req = request.get_ref();
 
         let body = SharedCreateTransferRequest {
@@ -169,12 +203,22 @@ impl TransferService for TransferServiceImpl {
             .create_transfer(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseTransferResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseTransferResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Transfer created successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to create transfer: {}", err.message);
+
+                Err(Status::internal("Failed to create transfer"))
+            }
         }
     }
 
@@ -182,6 +226,8 @@ impl TransferService for TransferServiceImpl {
         &self,
         request: Request<UpdateTransferRequest>,
     ) -> Result<Response<ApiResponseTransferResponse>, Status> {
+        info!("Updating transfer");
+
         let req = request.get_ref();
 
         let body = SharedUpdateTransferRequest {
@@ -198,12 +244,22 @@ impl TransferService for TransferServiceImpl {
             .update_transfer(&body)
             .await
         {
-            Ok(api_response) => Ok(Response::new(ApiResponseTransferResponse {
-                status: api_response.status,
-                message: api_response.message,
-                data: Some(api_response.data.into()),
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(api_response) => {
+                let reply = ApiResponseTransferResponse {
+                    status: api_response.status,
+                    message: api_response.message,
+                    data: Some(api_response.data.into()),
+                };
+
+                info!("Transfer updated successfully");
+
+                Ok(Response::new(reply))
+            }
+            Err(err) => {
+                error!("Failed to update transfer: {}", err.message);
+
+                Err(Status::internal("Failed to update transfer"))
+            }
         }
     }
 
@@ -220,11 +276,19 @@ impl TransferService for TransferServiceImpl {
             .delete_transfer(id)
             .await
         {
-            Ok(user) => Ok(Response::new(ApiResponseEmpty {
-                status: user.status,
-                message: user.message,
-            })),
-            Err(err) => Err(Status::internal(err.message)),
+            Ok(_user) => {
+                info!("Transfer deleted successfully");
+
+                Ok(Response::new(ApiResponseEmpty {
+                    status: "success".into(),
+                    message: "Transfer deleted successfully".into(),
+                }))
+            }
+            Err(err) => {
+                error!("Failed to delete transfer: {}", err.message);
+
+                Err(Status::internal("Failed to delete transfer"))
+            }
         }
     }
 }

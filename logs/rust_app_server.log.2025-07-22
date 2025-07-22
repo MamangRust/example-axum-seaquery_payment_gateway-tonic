@@ -16,3 +16,14 @@
 {"timestamp":"2025-07-22T14:06:10.208586Z","level":"ERROR","fields":{"message":"Operation failed: Email already exists"},"target":"shared::service::auth"}
 {"timestamp":"2025-07-22T14:06:17.797494Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
 {"timestamp":"2025-07-22T14:06:30.950592Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:40:04.196712Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-07-22T14:40:04.207276Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:40:04.208315Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:40:04.208445Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:41:03.736389Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:41:03.750703Z","level":"INFO","fields":{"message":"Operation completed successfully: User registered successfully"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T16:27:20.392337Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-07-22T16:27:20.410925Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T16:27:20.413243Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T16:27:20.413465Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T16:27:20.650844Z","level":"ERROR","fields":{"message":"","name":"BatchLogProcessor.ExportError","error":"Operation failed: export error: Status { code: Unavailable, message: \"tcp connect error\", source: Some(tonic::transport::Error(Transport, ConnectError(ConnectError(\"tcp connect error\", 172.20.0.7:4317, Os { code: 111, kind: ConnectionRefused, message: \"Connection refused\" })))) }"},"target":"opentelemetry_sdk"}

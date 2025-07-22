@@ -150,6 +150,11 @@ impl TransferServiceTrait for TransferService {
         &self,
         req: &DomainFindAllTransferRequest,
     ) -> Result<ApiResponsePagination<Vec<TransferResponse>>, ErrorResponse> {
+        info!(
+            "Retrieving transfers (page: {}, size: {} search: {})",
+            req.page, req.page_size, req.search
+        );
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -179,6 +184,12 @@ impl TransferServiceTrait for TransferService {
                     data: inner.data.into_iter().map(Into::into).collect(),
                     pagination: inner.pagination.unwrap_or_default().into(),
                 };
+
+                info!(
+                    "Retrieved transfers (page: {}, size: {}): {}",
+                    req.page, req.page_size, response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -188,6 +199,11 @@ impl TransferServiceTrait for TransferService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve transfers (page: {}, size: {}): {}",
+                    req.page, req.page_size, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -208,6 +224,8 @@ impl TransferServiceTrait for TransferService {
         &self,
         id: i32,
     ) -> Result<ApiResponse<Option<TransferResponse>>, ErrorResponse> {
+        info!("Retrieving transfer (id: {id})");
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -231,6 +249,8 @@ impl TransferServiceTrait for TransferService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!("Retrieved transfer (id: {id}): {}", response.message);
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -241,12 +261,17 @@ impl TransferServiceTrait for TransferService {
                     message: err.message().to_string(),
                 };
 
+                error!(
+                    "Failed to retrieve transfer (id: {id}): {}",
+                    error_response.message
+                );
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
                     &format!(
-                        "Failed to retrieve transfer (id: {}): {}",
-                        id, error_response.message
+                        "Failed to retrieve transfer (id: {id}): {}",
+                        error_response.message
                     ),
                 )
                 .await;
@@ -260,6 +285,8 @@ impl TransferServiceTrait for TransferService {
         &self,
         user_id: i32,
     ) -> Result<ApiResponse<Option<Vec<TransferResponse>>>, ErrorResponse> {
+        info!("Retrieving transfers (user_id: {user_id})");
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -289,6 +316,11 @@ impl TransferServiceTrait for TransferService {
                     data: Some(inner.data.into_iter().map(Into::into).collect()),
                 };
 
+                info!(
+                    "Retrieved transfers (user_id: {user_id}): {}",
+                    response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -298,6 +330,11 @@ impl TransferServiceTrait for TransferService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve transfers (user_id: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -318,6 +355,8 @@ impl TransferServiceTrait for TransferService {
         &self,
         user_id: i32,
     ) -> Result<ApiResponse<Option<TransferResponse>>, ErrorResponse> {
+        info!("Retrieving transfer (user_id: {user_id})");
+
         let method = Method::Get;
 
         let tracing_ctx = self.start_tracing(
@@ -347,6 +386,11 @@ impl TransferServiceTrait for TransferService {
                     data: inner.data.map(Into::into),
                 };
 
+                info!(
+                    "Retrieved transfer (user_id: {user_id}): {}",
+                    response.message
+                );
+
                 self.complete_tracing_success(&tracing_ctx, method, &response.message)
                     .await;
                 Ok(response)
@@ -356,6 +400,11 @@ impl TransferServiceTrait for TransferService {
                     status: err.code().to_string(),
                     message: err.message().to_string(),
                 };
+
+                error!(
+                    "Failed to retrieve transfer (user_id: {user_id}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -376,6 +425,11 @@ impl TransferServiceTrait for TransferService {
         &self,
         input: &DomainCreateTransferRequest,
     ) -> Result<ApiResponse<TransferResponse>, ErrorResponse> {
+        info!(
+            "Creating transfer from {} to {} of amount {}",
+            input.transfer_from, input.transfer_to, input.transfer_amount
+        );
+
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
             "CreateTransfer",
@@ -405,6 +459,11 @@ impl TransferServiceTrait for TransferService {
                     data: inner.data.into(),
                 };
 
+                info!(
+                    "Transfer from {} to {} of amount {} created successfully",
+                    input.transfer_from, input.transfer_to, input.transfer_amount
+                );
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -422,6 +481,11 @@ impl TransferServiceTrait for TransferService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to create transfer from {} to {}: {}",
+                    input.transfer_from, input.transfer_to, error_response.message
+                );
 
                 self.complete_tracing_error(
                     &tracing_ctx,
@@ -442,6 +506,11 @@ impl TransferServiceTrait for TransferService {
         &self,
         input: &DomainUpdateTransferRequest,
     ) -> Result<ApiResponse<TransferResponse>, ErrorResponse> {
+        info!(
+            "Updating transfer (id: {}, from: {}, to: {}, amount: {})",
+            input.transfer_id, input.transfer_from, input.transfer_to, input.transfer_amount
+        );
+
         let method = Method::Put;
         let transfer_id = input.transfer_id;
         let transfer_from = input.transfer_from;
@@ -479,10 +548,14 @@ impl TransferServiceTrait for TransferService {
                     data: inner.data.into(),
                 };
 
+                info!(
+                    "Transfer updated successfully (ID: {transfer_id}, from: {transfer_from}, to: {transfer_to})"
+                );
+
                 self.complete_tracing_success(
-                &tracing_ctx,
-                method,
-                &format!(
+                    &tracing_ctx,
+                    method,
+                    &format!(
                     "Transfer updated successfully (ID: {transfer_id}, from: {transfer_from}, to: {transfer_to})"
                 ),
             )
@@ -495,6 +568,11 @@ impl TransferServiceTrait for TransferService {
                     status: status.code().to_string(),
                     message: status.message().to_string(),
                 };
+
+                error!(
+                    "Failed to update transfer (ID: {transfer_id}, from: {transfer_from}, to: {transfer_to}): {}",
+                    error_response.message
+                );
 
                 self.complete_tracing_error(
                 &tracing_ctx,
@@ -512,6 +590,8 @@ impl TransferServiceTrait for TransferService {
     }
 
     async fn delete_transfer(&self, id: i32) -> Result<ApiResponse<()>, ErrorResponse> {
+        info!("Deleting transfer (id: {id})");
+
         let method = Method::Delete;
         let tracing_ctx = self.start_tracing(
             "DeleteTransfer",
@@ -534,6 +614,8 @@ impl TransferServiceTrait for TransferService {
                     data: (),
                 };
 
+                info!("Transfer {id} deleted successfully");
+
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
@@ -549,13 +631,12 @@ impl TransferServiceTrait for TransferService {
                     message: status.message().to_string(),
                 };
 
+                error!("Failed to delete transfer {id}: {}", error_response.message);
+
                 self.complete_tracing_error(
                     &tracing_ctx,
                     method,
-                    &format!(
-                        "Failed to delete transfer {}: {}",
-                        id, error_response.message
-                    ),
+                    &format!("Failed to delete transfer {id}: {}", error_response.message),
                 )
                 .await;
 
