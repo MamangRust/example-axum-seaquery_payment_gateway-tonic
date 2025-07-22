@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -8,6 +8,6 @@ pub struct Withdraw {
     pub user_id: i32,
     pub withdraw_amount: i32,
     pub withdraw_time: DateTime<Utc>,
-    pub created_at: Option<DateTime<Utc>>,
-    pub updated_at: Option<DateTime<Utc>>,
+    pub created_at: Option<NaiveDateTime>,
+    pub updated_at: Option<NaiveDateTime>,
 }

@@ -8,3 +8,11 @@
 {"timestamp":"2025-07-22T13:31:17.417033Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
 {"timestamp":"2025-07-22T13:32:19.025102Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
 {"timestamp":"2025-07-22T13:32:19.036732Z","level":"ERROR","fields":{"message":"Operation failed: User registration failed: Database error: error occurred while decoding column \"created_at\": mismatched types; Rust type `core::option::Option<chrono::datetime::DateTime<chrono::offset::utc::Utc>>` (as SQL type `TIMESTAMPTZ`) is not compatible with SQL type `TIMESTAMP`"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:05:42.842175Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-07-22T14:05:42.848690Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:05:42.849612Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:05:42.849736Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T14:06:10.201371Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:06:10.208586Z","level":"ERROR","fields":{"message":"Operation failed: Email already exists"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:06:17.797494Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}
+{"timestamp":"2025-07-22T14:06:30.950592Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"shared::service::auth"}

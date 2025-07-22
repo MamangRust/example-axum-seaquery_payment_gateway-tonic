@@ -27,8 +27,12 @@ impl From<Transfer> for TransferResponse {
             transfer_to: value.transfer_to,
             transfer_amount: value.transfer_amount,
             transfer_time: value.transfer_time,
-            created_at: value.created_at,
-            updated_at: value.updated_at,
+            created_at: value
+                .created_at
+                .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),
+            updated_at: value
+                .updated_at
+                .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),
         }
     }
 }

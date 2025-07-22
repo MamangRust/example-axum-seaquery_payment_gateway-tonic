@@ -1,2 +1,8 @@
 {"timestamp":"2025-07-22T13:32:19.024639Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
 {"timestamp":"2025-07-22T13:32:19.037049Z","level":"ERROR","fields":{"message":"Operation failed: Failed to register user hellloooo@gmail.com: Database error occurred"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:10.200957Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:10.208964Z","level":"ERROR","fields":{"message":"Operation failed: Failed to register user hellloooo@gmail.com: Email already exists"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:17.797070Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:17.807651Z","level":"ERROR","fields":{"message":"Operation failed: Failed to register user hellloo@gmail.com: h2 protocol error: http2 error"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:30.950195Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-07-22T14:06:30.956996Z","level":"ERROR","fields":{"message":"Operation failed: Failed to register user hellloo@gmail.com: h2 protocol error: http2 error"},"target":"seaquery_client_payment_gateway::service::auth"}
