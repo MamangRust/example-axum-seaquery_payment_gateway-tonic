@@ -1,0 +1,15 @@
+global:
+  smtp_smarthost: 'smtp.ethereal.email:587'
+  smtp_from: 'jerrell.wiegand83@ethereal.email'
+  smtp_auth_username: 'jerrell.wiegand83@ethereal.email'
+  smtp_auth_password: 'SR2Bs6YbpmeeF7s8Vr'
+  smtp_require_tls: true
+
+route:
+  receiver: 'email-notifications'
+
+receivers:
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'jerrell.wiegand83@ethereal.email'
+        send_resolved: true

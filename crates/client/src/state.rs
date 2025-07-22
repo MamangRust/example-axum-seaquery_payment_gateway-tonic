@@ -31,10 +31,10 @@ impl AppState {
 
         tokio::spawn(run_metrics_collector(system_metrics.clone()));
 
-        let channel = Channel::from_static("http://blog-server:50051")
+        let channel = Channel::from_static("http://payment-server:50051")
             .connect()
             .await
-            .context("gRPC connection to blog-server:50051 failed")?;
+            .context("gRPC connection to payment-server:50051 failed")?;
 
         let clients = GrpcClients::init(channel).await;
 

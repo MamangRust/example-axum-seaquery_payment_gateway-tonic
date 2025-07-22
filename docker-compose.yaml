@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: example_sea_query
+      POSTGRES_DB: example_sea_query_payment
     volumes:
       - postgres_payment_tonic-data:/var/lib/postgresql/data
     networks:
@@ -32,7 +32,7 @@ services:
       - app_payment_tonic
 
   payment-client:
-    image: ghcr.io/mamangrust/example-axum-seaquery_client_payment_gateway/payment-client:latest
+    image: ghcr.io/mamangrust/example-axum-seaquery_payment_gateway/example-axum-seaquery_payment_gateway-client:latest
     container_name: payment-client
     restart: unless-stopped
     env_file:
@@ -52,7 +52,7 @@ services:
       - app_payment_tonic
 
   payment-server:
-    image: ghcr.io/mamangrust/example-axum-seaquery_client_payment_gateway/payment-server:latest
+    image: ghcr.io/mamangrust/example-axum-seaquery_payment_gateway/example-axum-seaquery_payment_gateway-server:latest
     container_name: payment-server
     restart: unless-stopped
     env_file:

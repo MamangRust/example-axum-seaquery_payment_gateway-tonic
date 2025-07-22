@@ -1,0 +1,4 @@
+{"timestamp":"2025-07-22T13:12:29.032018Z","level":"WARN","fields":{"message":"acquired connection, but time to acquire exceeded slow threshold","aquired_after_secs":2.604701612,"slow_acquire_threshold_secs":2.0},"target":"sqlx::pool::acquire"}
+{"timestamp":"2025-07-22T13:12:29.148437Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T13:12:29.150190Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T13:12:29.150634Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
