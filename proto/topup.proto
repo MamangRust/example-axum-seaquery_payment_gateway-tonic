@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package topup;
+
+import "api.proto";
+
+
+message FindAllTopupRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+}
+
+message FindTopupByIdRequest {
+  int32 id = 1;
+}
+
+message FindTopupByUserIdRequest{
+  int32 user_id = 1;
+}
+
+message CreateTopupRequest {
+  int32 user_id = 1;
+  string topup_no = 2;
+  int32 topup_amount = 3;
+  string topup_method = 4;
+}
+
+message UpdateTopupRequest {
+  int32 topup_id = 1;
+  int32 user_id = 2;
+  int32 topup_amount = 3;
+  string topup_method = 4;
+}
+
+message TopupResponse {
+  int32 topup_id = 1;
+  int32 user_id = 2;
+  string topup_no = 3;
+  int32 topup_amount = 4;
+  string topup_method = 5;
+  string topup_time = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message ApiResponseTopupResponse {
+  string status = 1;
+  string message = 2;
+  TopupResponse data = 3;
+}
+
+message ApiResponsesTopupResponse {
+  string status = 1;
+  string message = 2;
+  repeated TopupResponse data = 3;
+}
+
+message ApiResponsesTopupPaginated {
+  string status = 1;
+  string message = 2;
+  repeated TopupResponse data = 3;
+  api.Pagination pagination = 4;
+}
+
+
+service TopupService {
+  rpc FindAllTopup(FindAllTopupRequest) returns (ApiResponsesTopupPaginated);
+  rpc FindTopupById(FindTopupByIdRequest) returns (ApiResponseTopupResponse);
+  rpc FindTopupByUserId(FindTopupByUserIdRequest) returns (ApiResponseTopupResponse);
+  rpc FindTopupByUsersId(FindTopupByUserIdRequest) returns (ApiResponsesTopupResponse);
+  rpc CreateTopup(CreateTopupRequest) returns (ApiResponseTopupResponse);
+  rpc UpdateTopup(UpdateTopupRequest) returns (ApiResponseTopupResponse);
+  rpc DeleteTopup(FindTopupByIdRequest) returns (api.ApiResponseEmpty);
+}

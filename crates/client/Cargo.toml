@@ -1,0 +1,42 @@
+[package]
+name = "seaquery_client_payment_gateway"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+shared.workspace = true
+genproto.workspace = true
+async-trait.workspace = true
+anyhow.workspace = true
+tonic.workspace = true
+axum.workspace = true
+axum-extra.workspace = true
+chrono.workspace = true
+dotenv.workspace = true
+jsonwebtoken.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+validator.workspace = true
+utoipa.workspace = true
+utoipa-axum.workspace = true
+utoipa-swagger-ui.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
+tower-http.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+prometheus-client.workspace = true
+prometheus-client-derive-encode.workspace = true
+opentelemetry.workspace = true
+opentelemetry-appender-tracing.workspace = true
+opentelemetry_sdk.workspace = true
+opentelemetry-stdout.workspace = true
+opentelemetry-otlp.workspace = true
+openssl.workspace = true
+
+
+[features]
+vendored-openssl = []
+
+[target.'cfg(target_env = "musl")'.dependencies]
+openssl.workspace = true

@@ -1,0 +1,5 @@
+cognitive-complexity-threshold = 30
+too-many-arguments-threshold = 6
+too-large-for-stack = 256
+allow-unwrap-in-tests = true
+warn-on-all-wildcard-imports = true

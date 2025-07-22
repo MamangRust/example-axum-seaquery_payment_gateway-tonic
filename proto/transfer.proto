@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package transfer;
+
+import "api.proto";
+
+
+message FindAllTransferRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+}
+
+message FindTransferByIdRequest {
+  int32 id = 1;
+}
+
+message FindTransferByUserIdRequest{
+  int32 user_id = 1;
+}
+
+
+message CreateTransferRequest {
+  int32 transfer_from = 1;
+  int32 transfer_to = 2;
+  int32 transfer_amount = 3;
+}
+
+
+message UpdateTransferRequest {
+  int32 transfer_id = 1;
+  int32 transfer_from = 2;
+  int32 transfer_to = 3;
+  int32 transfer_amount = 4;
+}
+
+
+
+message TransferResponse {
+  int32 transfer_id = 1;
+  int32 transfer_from = 2;
+  int32 transfer_to = 3;
+  int32 transfer_amount = 4;
+  string transfer_time = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message ApiResponseTransferResponse {
+  string status = 1;
+  string message = 2;
+  TransferResponse data = 3;
+}
+
+message ApiResponsesTransferResponse{
+  string status = 1;
+  string message = 2;
+  repeated TransferResponse data = 3;
+}
+
+message ApiResponsesTransferPaginated {
+  string status = 1;
+  string message = 2;
+  repeated TransferResponse data = 3;
+  api.Pagination pagination = 4;
+}
+
+
+service TransferService {
+  rpc FindAllTransfer(FindAllTransferRequest) returns (ApiResponsesTransferPaginated);
+  rpc FindTransferById(FindTransferByIdRequest) returns (ApiResponseTransferResponse);
+  rpc FindTransferByUserId(FindTransferByUserIdRequest) returns (ApiResponseTransferResponse);
+  rpc FindTransferByUsersId(FindTransferByUserIdRequest) returns (ApiResponsesTransferResponse);
+  rpc CreateTransfer(CreateTransferRequest) returns (ApiResponseTransferResponse);
+  rpc UpdateTransfer(UpdateTransferRequest) returns (ApiResponseTransferResponse);
+  rpc DeleteTransfer(FindTransferByIdRequest) returns (api.ApiResponseEmpty);
+}

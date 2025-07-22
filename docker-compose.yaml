@@ -1,0 +1,175 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: example_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: example_sea_query
+    volumes:
+      - postgres_payment_tonic-data:/var/lib/postgresql/data
+    networks:
+      - app_payment_tonic
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d example_sea_query_payment"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4
+    container_name: redis
+    command: ["redis-server", "--requirepass", "dragon_knight"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_payment_tonic-data:/data
+    restart: unless-stopped
+    networks:
+      - app_payment_tonic
+
+  payment-client:
+    image: ghcr.io/mamangrust/example-axum-seaquery_client_payment_gateway/payment-client:latest
+    container_name: payment-client
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      otel-collector:
+        condition: service_started
+      payment-server:
+        condition: service_started
+    ports:
+      - 5000:5000
+    volumes:
+      - ./logs:/var/log/app
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    networks:
+      - app_payment_tonic
+
+  payment-server:
+    image: ghcr.io/mamangrust/example-axum-seaquery_client_payment_gateway/payment-server:latest
+    container_name: payment-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 50051:50051
+    depends_on:
+      - otel-collector
+    volumes:
+      - ./logs:/var/log/app
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    networks:
+      - app_payment_tonic
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger-payment-tonic
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    restart: unless-stopped
+    networks:
+      - app_payment_tonic
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter-tonic
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - app_payment_tonic
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus-payment-tonic
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+    networks:
+      - app_payment_tonic
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-payment-tonic
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-payment-tonic-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - app_payment_tonic
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-tonic
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+      - "8889:8889"
+    volumes:
+      - ./otel-collector.yaml:/etc/otel-collector-config.yaml:ro
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    restart: unless-stopped
+    networks:
+      - app_payment_tonic
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: alertmanager
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    ports:
+      - "9093:9093"
+    networks:
+      - app_payment_tonic
+
+  loki:
+    container_name: loki
+    image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_payment_tonic_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - app_payment_tonic
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.9.0
+    volumes:
+      - ./observability/promtail-config.yaml:/etc/promtail/config.yaml
+      - ./logs:/var/log/app
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - app_payment_tonic
+
+networks:
+  app_payment_tonic:
+    driver: bridge
+
+volumes:
+  grafana-payment-tonic-data:
+  postgres_payment_tonic-data:
+  redis_payment_tonic-data:
+  loki_payment_tonic_data:

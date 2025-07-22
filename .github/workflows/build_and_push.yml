@@ -1,0 +1,86 @@
+name: Build and push Rust binaries
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - v*
+  pull_request:
+    paths:
+      - 'Dockerfile.*'
+      - 'src/**'
+      - 'Cargo.*'
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  REPO_NAME: mamangrust/example-axum-seaquery_payment_gateway
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target:
+          - name: example-axum-seaquery_payment_gateway-client
+            dockerfile: Dockerfile.client
+          - name: example-axum-seaquery_payment_gateway-server
+            dockerfile: Dockerfile.server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      - name: Install Protobuf Compiler
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Run rustfmt
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.REPO_NAME }}/${{ matrix.target.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.target.name }}
+            org.opencontainers.image.description=Rust binary image for ${{ matrix.target.name }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.MY_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.target.dockerfile }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.GHCR_REGISTRY }}/${{ env.REPO_NAME }}/${{ matrix.target.name }}:latest
+          labels: ${{ steps.meta.outputs.labels }}

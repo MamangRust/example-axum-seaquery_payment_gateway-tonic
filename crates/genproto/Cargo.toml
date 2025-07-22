@@ -1,0 +1,17 @@
+[package]
+name = "genproto"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+
+[lib]
+name = "genproto"
+path = "src/lib.rs"
+
+[dependencies]
+prost = "0.13.0"
+tonic = { workspace = true}
+
+[build-dependencies]
+tonic-build = { version = "0.13.0", features = ["prost"] }

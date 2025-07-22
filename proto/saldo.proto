@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package saldo;
+
+import "api.proto";
+
+
+message FindAllSaldoRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+}
+
+message FindSaldoByIdRequest {
+  int32 id = 1;
+}
+
+message FindSaldoByUserIdRequest{
+  int32 user_id = 1;
+}
+
+message SaldoResponse {
+  int32 saldo_id = 1;
+  int32 user_id = 2;
+  int32 total_balance = 3;
+  int32 withdraw_amount = 4;
+  string withdraw_time = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message CreateSaldoRequest {
+  int32 user_id = 1;
+  int32 total_balance = 2;
+}
+
+message UpdateSaldoRequest {
+  int32 saldo_id = 1;
+  int32 user_id = 2;
+  int32 total_balance = 3;
+}
+
+message ApiResponseSaldoResponse {
+  string status = 1;
+  string message = 2;
+  SaldoResponse data = 3;
+}
+
+message ApiResponsesSaldoResponse {
+  string status = 1;
+  string message = 2;
+  repeated SaldoResponse data = 3;
+}
+
+message ApiResponsesSaldoPaginated {
+  string status = 1;
+  string message = 2;
+  repeated SaldoResponse data = 3;
+  api.Pagination pagination = 4;
+}
+
+
+service SaldoService {
+  rpc FindAllSaldo(FindAllSaldoRequest) returns (ApiResponsesSaldoPaginated);
+  rpc FindSaldoById(FindSaldoByIdRequest) returns (ApiResponseSaldoResponse);
+  rpc FindSaldoByUserId(FindSaldoByUserIdRequest) returns (ApiResponseSaldoResponse);
+  rpc FindSaldoByUsersId(FindSaldoByUserIdRequest) returns (ApiResponsesSaldoResponse);
+  rpc CreateSaldo(CreateSaldoRequest) returns (ApiResponseSaldoResponse);
+  rpc UpdateSaldo(UpdateSaldoRequest) returns (ApiResponseSaldoResponse);
+  rpc DeleteSaldo(FindSaldoByIdRequest) returns (api.ApiResponseEmpty);
+}

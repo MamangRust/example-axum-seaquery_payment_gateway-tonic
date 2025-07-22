@@ -1,0 +1,44 @@
+FROM rust:1.88 AS builder
+
+RUN apt-get update && apt-get install -y \
+    protobuf-compiler \
+    musl-tools \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rustup target add x86_64-unknown-linux-musl
+
+WORKDIR /app
+
+
+COPY Cargo.toml Cargo.lock ./
+COPY crates/ ./crates/
+COPY proto/ ./proto/
+COPY migrations/ ./migrations/
+
+RUN cargo build --release --target x86_64-unknown-linux-musl -p seaquery_client_payment_gateway
+
+FROM alpine:3.20
+
+RUN apk --no-cache add ca-certificates
+
+RUN addgroup -g 1000 appuser && \
+    adduser -D -s /bin/sh -u 1000 -G appuser appuser
+
+WORKDIR /app
+
+RUN mkdir -p /var/log/app && \
+    chown -R appuser:appuser /var/log/app && \
+    chmod -R 755 /var/log/app
+
+
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/seaquery_client_payment_gateway ./client
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 5000
+
+CMD ["./client"]
