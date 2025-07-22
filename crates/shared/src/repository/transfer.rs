@@ -192,8 +192,6 @@ impl TransferRepositoryTrait for TransferRepository {
                 input.transfer_to.into(),
                 input.transfer_amount.into(),
                 now.into(),
-                now.into(),
-                now.into(),
             ])
             .unwrap()
             .returning_all()

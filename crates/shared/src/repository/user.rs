@@ -192,6 +192,8 @@ impl UserRepositoryTrait for UserRepository {
                 Users::Email,
                 Users::Password,
                 Users::NocTransfer,
+                Users::CreatedAt,
+                Users::UpdatedAt,
             ])
             .values([
                 input.firstname.clone().into(),
