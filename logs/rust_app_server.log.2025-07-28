@@ -1,0 +1,4 @@
+{"timestamp":"2025-07-28T21:19:20.067562Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-07-28T21:19:20.089779Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-28T21:19:20.091679Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-28T21:19:20.091857Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}

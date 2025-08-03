@@ -10,8 +10,9 @@ name = "genproto"
 path = "src/lib.rs"
 
 [dependencies]
-prost = "0.13.0"
+prost = "0.14.1"
+tonic-prost = "0.14.0"
 tonic = { workspace = true}
 
 [build-dependencies]
-tonic-build = { version = "0.13.0", features = ["prost"] }
+tonic-prost-build = "0.14.0"

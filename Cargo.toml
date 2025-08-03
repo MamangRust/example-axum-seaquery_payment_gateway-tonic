@@ -44,25 +44,36 @@ tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread", "signal",
 axum = { version = "0.8.4", features = ["multipart"] }
 axum-extra = { version = "0.10.1", features = ["cookie"] }
 tower-http = { version = "0.6.2", features = ["limit", "trace", "fs"] }
-tonic = "0.13.0"
+tonic = "0.14.0"
 utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
 utoipa-axum = "0.2.0"
 utoipa-swagger-ui = { version = "9.0.1", features = ["axum"] }
 uuid = { version = "1.16.0", features = ["v4"] }
-sysinfo = "0.34.2"
+sysinfo = "0.36.1"
 openssl = { version = "0.10.73", features = ["vendored"] }
 
 
 [profile.dev]
 opt-level = 1
 debug = true
+split-debuginfo = 'unpacked'
+debug-assertions = true
 overflow-checks = true
 lto = false
-codegen-units = 256
+panic = 'unwind'
 incremental = true
-
+codegen-units = 128 
+rpath = false
 
 [profile.release]
-opt-level = "z"
+opt-level = 'z'
+debug = false
+split-debuginfo = 'unpacked'
+debug-assertions = false
+overflow-checks = false
 lto = true
+panic = 'abort'
+incremental = false
 codegen-units = 1
+rpath = false
+strip = "debuginfo"

@@ -41,3 +41,7 @@
 {"timestamp":"2025-07-22T17:28:52.483474Z","level":"INFO","fields":{"message":"Found 1 users"},"target":"shared::repository::user"}
 {"timestamp":"2025-07-22T17:28:52.507579Z","level":"INFO","fields":{"message":"Found 1 users out of total 3"},"target":"shared::repository::user"}
 {"timestamp":"2025-07-22T17:28:52.508750Z","level":"INFO","fields":{"message":"Operation completed successfully: users retrieved from database"},"target":"shared::service::user"}
+{"timestamp":"2025-07-22T17:57:10.379609Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-07-22T17:57:10.386983Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T17:57:10.388099Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-07-22T17:57:10.388308Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}

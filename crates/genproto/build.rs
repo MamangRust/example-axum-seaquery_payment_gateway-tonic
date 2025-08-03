@@ -5,7 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     fs::create_dir_all(out_dir)?;
 
-    tonic_build::configure()
+    tonic_prost_build::configure()
         .build_server(true)
         .out_dir(out_dir)
         .compile_protos(
