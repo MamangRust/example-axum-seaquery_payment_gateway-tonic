@@ -1,7 +1,7 @@
 use redis::{Commands, Connection};
 use serde::{Serialize, de::DeserializeOwned};
 use std::{sync::Arc, time::Duration};
-use tracing::{debug, error};
+use tracing::{debug, error, warn};
 
 #[derive(Clone)]
 pub struct CacheStore {
@@ -41,11 +41,11 @@ impl CacheStore {
                 }
             },
             Ok(None) => {
-                debug!("Cache miss for key: {}", key);
+                warn!("Cache miss for key: {key}");
                 None
             }
             Err(e) => {
-                error!("Redis get error for key {}: {:?}", key, e);
+                error!("Redis get error for key {e}: {:?}", key);
                 None
             }
         }
@@ -77,17 +77,16 @@ impl CacheStore {
 
             match result {
                 Ok(_) => debug!("Cached key {} with TTL {:?}", key, expiration),
-                Err(e) => error!("Failed to set cache key {}: {:?}", key, e),
+                Err(e) => error!("Failed to set cache key {e}: {:?}", key),
             }
         }
     }
 
     pub fn delete_from_cache(&self, key: &str) {
-        let conn = self.get_conn();
-        if let Some(mut conn) = conn {
-            if let Err(e) = redis::cmd("DEL").arg(key).query::<()>(&mut conn) {
-                error!("Failed to delete key {}: {:?}", key, e);
-            }
+        if let Some(mut conn) = self.get_conn()
+            && let Err(e) = redis::cmd("DEL").arg(key).query::<()>(&mut conn)
+        {
+            error!("Failed to delete key {e}: {:?}", key);
         }
     }
 }

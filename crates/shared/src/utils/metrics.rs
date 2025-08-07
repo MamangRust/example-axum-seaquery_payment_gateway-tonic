@@ -13,10 +13,11 @@ fn get_thread_count(pid: usize) -> Option<i64> {
     let path = format!("/proc/{pid}/status");
     if let Ok(contents) = fs::read_to_string(path) {
         for line in contents.lines() {
-            if line.starts_with("Threads:") {
-                if let Some(thread_count) = line.split_whitespace().nth(1) {
-                    return thread_count.parse::<i64>().ok();
-                }
+            if line.starts_with("Threads:") && line.split_whitespace().nth(1).is_some() {
+                return line
+                    .split_whitespace()
+                    .nth(1)
+                    .and_then(|thread_count| thread_count.parse::<i64>().ok());
             }
         }
     }
