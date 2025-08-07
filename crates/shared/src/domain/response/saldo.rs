@@ -25,7 +25,9 @@ impl From<Saldo> for SaldoResponse {
             user_id: value.user_id,
             total_balance: value.total_balance,
             withdraw_amount: value.withdraw_amount,
-            withdraw_time: value.withdraw_time,
+            withdraw_time: value
+                .withdraw_time
+                .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),
             created_at: value
                 .created_at
                 .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),

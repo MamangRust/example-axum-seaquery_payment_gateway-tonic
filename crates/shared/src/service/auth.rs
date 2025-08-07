@@ -20,7 +20,7 @@ use prometheus_client::registry::Registry;
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, time::Instant};
 use tonic::Request;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -165,7 +165,11 @@ impl AuthServiceTrait for AuthService {
         &self,
         input: &RegisterRequest,
     ) -> Result<ApiResponse<UserResponse>, ErrorResponse> {
-        info!("Registering user");
+        let log_msg = format!(
+            "📝 [REGISTER] Starting user registration | Email: {}",
+            input.email
+        );
+        info!("{log_msg}");
 
         let method = Method::Post;
         let tracing_ctx = self.start_tracing(
@@ -182,7 +186,11 @@ impl AuthServiceTrait for AuthService {
         let cache_key = format!("auth:registered:{}", input.email);
 
         if let Some(cached_user) = self.cache_store.get_from_cache(&cache_key) {
-            info!("Found user in cache");
+            let log_msg = format!(
+                "✅ [REGISTER] Cache hit! User already registered | Email: {}",
+                input.email
+            );
+            info!("{log_msg}");
 
             self.complete_tracing_success(
                 &tracing_ctx,
@@ -200,31 +208,56 @@ impl AuthServiceTrait for AuthService {
 
         match self.repository.find_by_email_exists(&input.email).await {
             Ok(true) => {
-                self.complete_tracing_error(&tracing_ctx, method, "Email already exists")
-                    .await;
+                let msg = "Email already exists";
+                let log_msg = format!(
+                    "❌ [REGISTER] Registration rejected: Email already taken | Email: {}",
+                    input.email
+                );
+                warn!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, msg).await;
                 return Err(ErrorResponse::from(AppError::EmailAlreadyExists));
             }
-            Ok(false) => (),
+            Ok(false) => {
+                let check_log = format!(
+                    "🔍 [REGISTER] Email available | Proceeding with registration | Email: {}",
+                    input.email
+                );
+                info!("{}", check_log);
+            }
             Err(err) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("Error checking email: {err}"),
-                )
-                .await;
+                let msg = format!("Error checking email availability: {err}");
+                let log_msg = format!(
+                    "🛑 [REGISTER] Database error during email check | Email: {} | Error: {err}",
+                    input.email,
+                );
+                error!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
                 return Err(ErrorResponse::from(err));
             }
         }
 
         let hashed_password = match self.hashing.hash_password(&input.password).await {
-            Ok(hashed) => hashed,
+            Ok(hashed) => {
+                let hash_log = format!(
+                    "🔐 [REGISTER] Password hashed successfully | Email: {}",
+                    input.email
+                );
+                info!("{hash_log}");
+                hashed
+            }
             Err(e) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("Password hashing failed: {e}"),
-                )
-                .await;
+                let msg = format!("Password hashing failed: {e}");
+                let log_msg = format!(
+                    "🛑 [REGISTER] Critical error: Failed to hash password | Email: {} | Error: {e}",
+                    input.email,
+                );
+                error!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
                 return Err(ErrorResponse::from(AppError::HashingError(e)));
             }
         };
@@ -242,31 +275,44 @@ impl AuthServiceTrait for AuthService {
 
         match self.repository.create_user(&create_user_request).await {
             Ok(user) => {
+                let success_msg = format!(
+                    "🎉 [REGISTER] User successfully created | Email: {}",
+                    input.email
+                );
+                info!("{success_msg}");
+
                 let response = ApiResponse {
                     status: "success".to_string(),
                     message: "User registered successfully".to_string(),
                     data: UserResponse::from(user),
                 };
 
-                self.complete_tracing_success(&tracing_ctx, method, "User registered successfully")
-                    .await;
-
                 self.cache_store.set_to_cache(
                     &cache_key,
                     &response.data.clone(),
                     Duration::from_secs(60),
                 );
+                let cache_log = format!(
+                    "💾 [REGISTER] User response cached for 60s | Email: {}",
+                    input.email
+                );
+                info!("{cache_log}");
+
+                self.complete_tracing_success(&tracing_ctx, method, "User registered successfully")
+                    .await;
 
                 Ok(response)
             }
             Err(err) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("User registration failed: {err}"),
-                )
-                .await;
+                let msg = format!("User registration failed: {err}");
+                let log_msg = format!(
+                    "🛑 [REGISTER] Failed to save user to database | Email: {} | Error: {err}",
+                    input.email,
+                );
+                error!("{log_msg}");
 
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
                 Err(ErrorResponse::from(err))
             }
         }
@@ -289,7 +335,11 @@ impl AuthServiceTrait for AuthService {
         let cache_key = format!("auth:login:{}", input.email);
 
         if let Some(cached_token) = self.cache_store.get_from_cache(&cache_key) {
-            info!("Found token in cache");
+            let log_msg = format!(
+                "✅ [LOGIN] Cache hit! User already logged in | Email: {}",
+                input.email
+            );
+            info!("{log_msg}");
 
             self.complete_tracing_success(
                 &tracing_ctx,
@@ -305,32 +355,42 @@ impl AuthServiceTrait for AuthService {
             });
         }
 
+        let log_msg = format!("🔄 [LOGIN] Authenticating user | Email: {}", input.email);
+        info!("{log_msg}");
+
         let user = match self.repository.find_by_email(&input.email).await {
             Ok(Some(user)) => user,
             Ok(None) => {
-                self.complete_tracing_error(&tracing_ctx, method, "User not found")
-                    .await;
-                return Err(ErrorResponse::from(AppError::NotFound(
-                    "User not found".to_string(),
-                )));
+                let msg = "User not found";
+                let log_msg = format!("❌ [LOGIN] User not found | Email: {}", input.email);
+                warn!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, msg).await;
+                return Err(ErrorResponse::from(AppError::NotFound(msg.to_string())));
             }
             Err(err) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("Error finding user: {err}"),
-                )
-                .await;
+                let msg = format!("Error finding user: {err}");
+                let log_msg = format!(
+                    "🛑 [LOGIN] Database error during user lookup | Email: {} | Error: {err}",
+                    input.email,
+                );
+                error!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
                 return Err(ErrorResponse::from(err));
             }
         };
 
-        if (self
+        if self
             .hashing
             .compare_password(&user.password, &input.password)
-            .await)
+            .await
             .is_err()
         {
+            let log_msg = format!("🔐 [LOGIN] Invalid password | Email: {}", input.email);
+            warn!("{log_msg}");
+
             self.complete_tracing_error(&tracing_ctx, method, "Invalid credentials")
                 .await;
             return Err(ErrorResponse::from(AppError::InvalidCredentials));
@@ -339,24 +399,35 @@ impl AuthServiceTrait for AuthService {
         let token = match self.jwt_config.generate_token(user.user_id as i64) {
             Ok(token) => token,
             Err(err) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("Token generation failed: {err}"),
-                )
-                .await;
+                let msg = format!("Token generation failed: {err}");
+                let log_msg = format!(
+                    "🛑 [LOGIN] Failed to generate JWT token | Email: {} | Error: {err}",
+                    input.email,
+                );
+                error!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
                 return Err(ErrorResponse::from(err));
             }
         };
 
         self.cache_store
-            .set_to_cache(&input.email, &token, Duration::from_secs(60));
+            .set_to_cache(&cache_key, &token, Duration::from_secs(60));
+        let cache_log_msg = format!("💾 [LOGIN] Token cached for 60s | Email: {}", input.email);
+        info!("{cache_log_msg}");
 
         let response = ApiResponse {
             status: "success".to_string(),
             message: "Login successful".to_string(),
             data: token,
         };
+
+        let success_log_msg = format!(
+            "🎉 [LOGIN] User logged in successfully | Email: {}",
+            input.email
+        );
+        info!("{success_log_msg}");
 
         self.complete_tracing_success(&tracing_ctx, method, "Login successful")
             .await;
@@ -377,6 +448,9 @@ impl AuthServiceTrait for AuthService {
 
         match self.repository.find_by_id(id).await {
             Ok(Some(user)) => {
+                let log_msg = format!("✅ [GET /me] User retrieved successfully | ID: {id}");
+                info!("{log_msg}");
+
                 self.complete_tracing_success(&tracing_ctx, method, "User retrieved successfully")
                     .await;
 
@@ -388,12 +462,18 @@ impl AuthServiceTrait for AuthService {
             }
             Ok(None) => {
                 let msg = format!("User with id {id} not found");
+                let log_msg = format!("❌ [GET /me] User not found | ID: {id}");
+                warn!("{log_msg}");
+
                 self.complete_tracing_error(&tracing_ctx, method, &msg)
                     .await;
                 Err(ErrorResponse::from(AppError::NotFound(msg)))
             }
             Err(err) => {
                 let msg = format!("Failed to retrieve user {id}: {err}");
+                let log_msg = format!("🛑 [GET /me] Internal error | ID: {id} | Error: {err}");
+                error!("{log_msg}");
+
                 self.complete_tracing_error(&tracing_ctx, method, &msg)
                     .await;
                 Err(ErrorResponse::from(err))

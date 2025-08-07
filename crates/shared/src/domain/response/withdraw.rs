@@ -24,7 +24,7 @@ impl From<Withdraw> for WithdrawResponse {
             withdraw_id: value.withdraw_id,
             user_id: value.user_id,
             withdraw_amount: value.withdraw_amount,
-            withdraw_time: value.withdraw_time,
+            withdraw_time: DateTime::from_naive_utc_and_offset(value.withdraw_time, Utc),
             created_at: value
                 .created_at
                 .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),

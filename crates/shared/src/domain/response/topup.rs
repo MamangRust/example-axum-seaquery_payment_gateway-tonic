@@ -27,7 +27,7 @@ impl From<Topup> for TopupResponse {
             topup_no: value.topup_no,
             topup_amount: value.topup_amount,
             topup_method: value.topup_method,
-            topup_time: value.topup_time,
+            topup_time: DateTime::from_naive_utc_and_offset(value.topup_time, Utc),
             created_at: value
                 .created_at
                 .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc)),

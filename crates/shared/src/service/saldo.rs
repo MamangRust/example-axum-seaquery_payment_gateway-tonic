@@ -173,9 +173,9 @@ impl SaldoServiceTrait for SaldoService {
         };
 
         let tracing_ctx = self.start_tracing(
-            "Getsaldos",
+            "GetSaldos",
             vec![
-                KeyValue::new("component", "category"),
+                KeyValue::new("component", "saldo"),
                 KeyValue::new("page", page.to_string()),
                 KeyValue::new("page_size", page_size.to_string()),
                 KeyValue::new("search", search.clone().unwrap_or_default()),
@@ -199,7 +199,11 @@ impl SaldoServiceTrait for SaldoService {
             .cache_store
             .get_from_cache::<ApiResponsePagination<Vec<SaldoResponse>>>(&cache_key)
         {
-            info!("Found saldos in cache");
+            let log_msg = format!(
+                "✅ [GET /saldos] Cache hit! Retrieved from cache | Page: {page}, Size: {page_size}, Search: '{}'",
+                search.clone().unwrap_or_default()
+            );
+            info!("{log_msg}");
 
             self.complete_tracing_success(&tracing_ctx, method, "Saldos retrieved from cache")
                 .await;
@@ -207,22 +211,27 @@ impl SaldoServiceTrait for SaldoService {
             return Ok(cached);
         }
 
+        let log_msg = format!(
+            "🔁 [GET /saldos] Cache miss, querying DB | Page: {page}, Size: {page_size}, Search: '{}'",
+            search.clone().unwrap_or_default()
+        );
+
+        info!("{log_msg}");
+
         match self
             .saldo_repository
-            .find_all(page, page_size, search)
+            .find_all(page, page_size, search.clone())
             .await
         {
             Ok((saldos, total_items)) => {
                 let total_pages = (total_items as f64 / page_size as f64).ceil() as i32;
-                let category_responses = saldos
-                    .into_iter()
-                    .map(SaldoResponse::from)
-                    .collect::<Vec<_>>();
+                let saldo_responses: Vec<SaldoResponse> =
+                    saldos.into_iter().map(SaldoResponse::from).collect();
 
                 let response = ApiResponsePagination {
                     status: "success".to_string(),
-                    message: "saldos retrieved successfully".to_string(),
-                    data: category_responses.clone(),
+                    message: "Saldos retrieved successfully".to_string(),
+                    data: saldo_responses,
                     pagination: Pagination {
                         page,
                         page_size,
@@ -232,12 +241,16 @@ impl SaldoServiceTrait for SaldoService {
                 };
 
                 self.cache_store
-                    .set_to_cache(&cache_key, &response, Duration::from_secs(60 * 5));
+                    .set_to_cache(&cache_key, &response, Duration::from_secs(300));
+
+                let cache_log =
+                    format!("💾 [GET /saldos] Response cached | Key: '{cache_key}' | TTL: 300s");
+                info!("{cache_log}");
 
                 self.complete_tracing_success(
                     &tracing_ctx,
                     method,
-                    "saldos retrieved from database",
+                    "Saldos retrieved from database",
                 )
                 .await;
 
@@ -245,12 +258,15 @@ impl SaldoServiceTrait for SaldoService {
             }
 
             Err(err) => {
-                self.complete_tracing_error(
-                    &tracing_ctx,
-                    method,
-                    &format!("Failed to retrieve saldos: {err}"),
-                )
-                .await;
+                let msg = format!("Failed to retrieve saldos from database: e{err}");
+                let log_msg = format!(
+                    "🛑 [GET /saldos] Database query failed | Page: {page}, Size: {page_size}, Search: '{}' | Error: {err}",
+                    search.clone().unwrap_or_default(),
+                );
+                error!("{log_msg}");
+
+                self.complete_tracing_error(&tracing_ctx, method, &msg)
+                    .await;
 
                 Err(ErrorResponse::from(err))
             }

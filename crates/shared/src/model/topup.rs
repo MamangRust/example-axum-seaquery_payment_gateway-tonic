@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -9,7 +9,7 @@ pub struct Topup {
     pub topup_no: String,
     pub topup_amount: i32,
     pub topup_method: String,
-    pub topup_time: DateTime<Utc>,
+    pub topup_time: NaiveDateTime,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
 }
