@@ -110,3 +110,43 @@
 {"timestamp":"2025-08-07T19:16:48.026267Z","level":"INFO","fields":{"message":"Starting operation: CreateWithdraw"},"target":"seaquery_client_payment_gateway::service::withdraw"}
 {"timestamp":"2025-08-07T19:16:48.026894Z","level":"ERROR","fields":{"message":"Failed to create withdraw for user_id 28: Invalid datetime: input contains invalid characters"},"target":"seaquery_client_payment_gateway::service::withdraw"}
 {"timestamp":"2025-08-07T19:16:48.026924Z","level":"ERROR","fields":{"message":"Operation failed: Failed to create withdraw for user_id 28: Invalid datetime: input contains invalid characters"},"target":"seaquery_client_payment_gateway::service::withdraw"}
+{"timestamp":"2025-08-07T20:25:57.742345Z","level":"INFO","fields":{"message":"Registering user: alice_1754598357@example.com"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:57.742399Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:57.764866Z","level":"INFO","fields":{"message":"User alice_1754598357@example.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:57.764922Z","level":"INFO","fields":{"message":"Operation completed successfully: User alice_1754598357@example.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:58.770500Z","level":"INFO","fields":{"message":"Registering user: bob_1754598357@example.com"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:58.770541Z","level":"INFO","fields":{"message":"Starting operation: RegisterUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:58.779776Z","level":"INFO","fields":{"message":"User bob_1754598357@example.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:58.779814Z","level":"INFO","fields":{"message":"Operation completed successfully: User bob_1754598357@example.com registered successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:59.784303Z","level":"INFO","fields":{"message":"Logging in user: alice_1754598357@example.com"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:59.784338Z","level":"INFO","fields":{"message":"Starting operation: LoginUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:59.790465Z","level":"INFO","fields":{"message":"User alice_1754598357@example.com logged in successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:25:59.790506Z","level":"INFO","fields":{"message":"Operation completed successfully: User alice_1754598357@example.com logged in successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:26:00.794314Z","level":"INFO","fields":{"message":"Logging in user: bob_1754598357@example.com"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:26:00.794349Z","level":"INFO","fields":{"message":"Starting operation: LoginUser"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:26:00.800199Z","level":"INFO","fields":{"message":"User bob_1754598357@example.com logged in successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:26:00.800247Z","level":"INFO","fields":{"message":"Operation completed successfully: User bob_1754598357@example.com logged in successfully"},"target":"seaquery_client_payment_gateway::service::auth"}
+{"timestamp":"2025-08-07T20:26:01.804383Z","level":"INFO","fields":{"message":"Retrieving user (id: 29)"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.804422Z","level":"INFO","fields":{"message":"Starting operation: GetUser"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.806406Z","level":"INFO","fields":{"message":"Retrieved user (id: 29): User fetched successfully"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.806441Z","level":"INFO","fields":{"message":"Operation completed successfully: User fetched successfully"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.809986Z","level":"INFO","fields":{"message":"Retrieving user (id: 30)"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.810026Z","level":"INFO","fields":{"message":"Starting operation: GetUser"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.811667Z","level":"INFO","fields":{"message":"Retrieved user (id: 30): User fetched successfully"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:01.811704Z","level":"INFO","fields":{"message":"Operation completed successfully: User fetched successfully"},"target":"seaquery_client_payment_gateway::service::user"}
+{"timestamp":"2025-08-07T20:26:02.815704Z","level":"INFO","fields":{"message":"Create saldo request: CreateSaldoRequest {\n    user_id: 29,\n    total_balance: 100000,\n}"},"target":"seaquery_client_payment_gateway::service::saldo"}
+{"timestamp":"2025-08-07T20:26:02.815749Z","level":"INFO","fields":{"message":"Starting operation: CreateSaldo"},"target":"seaquery_client_payment_gateway::service::saldo"}
+{"timestamp":"2025-08-07T20:26:02.846930Z","level":"INFO","fields":{"message":"Saldo for user_id 29 created successfully"},"target":"seaquery_client_payment_gateway::service::saldo"}
+{"timestamp":"2025-08-07T20:26:02.846972Z","level":"INFO","fields":{"message":"Operation completed successfully: Saldo for user_id 29 created successfully"},"target":"seaquery_client_payment_gateway::service::saldo"}
+{"timestamp":"2025-08-07T20:26:03.851310Z","level":"INFO","fields":{"message":"Creating topup (user_id: 30, topup_no: TOPUP1754598363, topup_amount: 300000, topup_method: shopeepay)"},"target":"seaquery_client_payment_gateway::service::topup"}
+{"timestamp":"2025-08-07T20:26:03.851352Z","level":"INFO","fields":{"message":"Starting operation: CreateTopup"},"target":"seaquery_client_payment_gateway::service::topup"}
+{"timestamp":"2025-08-07T20:26:03.861471Z","level":"INFO","fields":{"message":"Topup TOPUP1754598363 for user_id 30 created successfully"},"target":"seaquery_client_payment_gateway::service::topup"}
+{"timestamp":"2025-08-07T20:26:03.861515Z","level":"INFO","fields":{"message":"Operation completed successfully: Topup TOPUP1754598363 for user_id 30 created successfully"},"target":"seaquery_client_payment_gateway::service::topup"}
+{"timestamp":"2025-08-07T20:26:04.865682Z","level":"INFO","fields":{"message":"Creating transfer from 29 to 30 of amount 50000"},"target":"seaquery_client_payment_gateway::service::transfer"}
+{"timestamp":"2025-08-07T20:26:04.865719Z","level":"INFO","fields":{"message":"Starting operation: CreateTransfer"},"target":"seaquery_client_payment_gateway::service::transfer"}
+{"timestamp":"2025-08-07T20:26:04.885911Z","level":"INFO","fields":{"message":"Transfer from 29 to 30 of amount 50000 created successfully"},"target":"seaquery_client_payment_gateway::service::transfer"}
+{"timestamp":"2025-08-07T20:26:04.885957Z","level":"INFO","fields":{"message":"Operation completed successfully: Transfer from 29 to 30 of amount 50000 created successfully"},"target":"seaquery_client_payment_gateway::service::transfer"}
+{"timestamp":"2025-08-07T20:26:05.890206Z","level":"INFO","fields":{"message":"Creating withdraw for user_id 30"},"target":"seaquery_client_payment_gateway::service::withdraw"}
+{"timestamp":"2025-08-07T20:26:05.890241Z","level":"INFO","fields":{"message":"Starting operation: CreateWithdraw"},"target":"seaquery_client_payment_gateway::service::withdraw"}
+{"timestamp":"2025-08-07T20:26:05.899388Z","level":"INFO","fields":{"message":"Withdraw for user_id 30 created successfully"},"target":"seaquery_client_payment_gateway::service::withdraw"}
+{"timestamp":"2025-08-07T20:26:05.899430Z","level":"INFO","fields":{"message":"Operation completed successfully: Withdraw for user_id 30 created successfully"},"target":"seaquery_client_payment_gateway::service::withdraw"}

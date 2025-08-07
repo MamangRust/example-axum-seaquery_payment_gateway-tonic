@@ -63,7 +63,11 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to initialize database pool")?;
 
-    let state = Arc::new(AppState::new(db_pool, &config.jwt_secret).await);
+    let state = Arc::new(
+        AppState::new(db_pool, &config.jwt_secret)
+            .await
+            .context("Failed to create AppState")?,
+    );
 
     let service_auth = service::auth::AuthServiceImpl::new(state.clone());
     let service_user = service::user::UserServiceImpl::new(state.clone());
@@ -103,11 +107,10 @@ async fn main() -> Result<()> {
     let axum_server = tokio::spawn(async move {
         axum::serve(listener, app)
             .await
-            .context("Axum server failed")
+            .context("axum server failed")
     });
 
-    let grpc_result = grpc_server.await.context("gRPC task join error")?;
-    let axum_result = axum_server.await.context("Axum task join error")?;
+    let (grpc_result, axum_result) = tokio::try_join!(grpc_server, axum_server)?;
 
     grpc_result.context("gRPC server failed")?;
     axum_result.context("Axum server failed")?;

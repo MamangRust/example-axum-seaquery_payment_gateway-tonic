@@ -1,3 +1,4 @@
+use crate::{di::DependenciesInject, service::GrpcClients};
 use anyhow::{Context, Result};
 use prometheus_client::registry::Registry;
 use shared::{
@@ -9,14 +10,12 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::transport::Channel;
 
-use crate::{di::DependenciesInject, service::GrpcClients};
-
 #[derive(Debug)]
 pub struct AppState {
-    pub registry: Arc<Mutex<Registry>>,
     pub jwt_config: DynJwtService,
-    pub metrics: Arc<Mutex<Metrics>>,
     pub di_container: DependenciesInject,
+    pub registry: Arc<Mutex<Registry>>,
+    pub metrics: Arc<Mutex<Metrics>>,
     pub system_metrics: Arc<SystemMetrics>,
 }
 

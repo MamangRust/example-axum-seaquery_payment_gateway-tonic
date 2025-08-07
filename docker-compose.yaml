@@ -59,6 +59,7 @@ services:
       - .env
     ports:
       - 50051:50051
+      - 8081:8080
     depends_on:
       - otel-collector
     volumes:

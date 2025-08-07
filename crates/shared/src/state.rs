@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use prometheus_client::registry::Registry;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -10,18 +11,17 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct AppState {
-    pub registry: Arc<Mutex<Registry>>,
     pub di_container: DependenciesInject,
     pub jwt_config: DynJwtService,
+    pub registry: Arc<Mutex<Registry>>,
     pub metrics: Arc<Mutex<Metrics>>,
     pub system_metrics: Arc<SystemMetrics>,
 }
 
 impl AppState {
-    pub async fn new(pool: ConnectionPool, jwt_secret: &str) -> Self {
+    pub async fn new(pool: ConnectionPool, jwt_secret: &str) -> Result<Self> {
         let jwt_config = Arc::new(JwtConfig::new(jwt_secret)) as DynJwtService;
         let hashing = Arc::new(Hashing::new()) as DynHashing;
-
         let registry = Arc::new(Mutex::new(Registry::default()));
         let metrics = Arc::new(Mutex::new(Metrics::new()));
         let system_metrics = Arc::new(SystemMetrics::new());
@@ -40,15 +40,16 @@ impl AppState {
                 &mut registry_guard,
             )
             .await
+            .context("Failed to initialize dependency injection container")?
         };
 
-        Self {
+        Ok(Self {
             registry,
             di_container,
             jwt_config,
             metrics,
             system_metrics,
-        }
+        })
     }
 }
 

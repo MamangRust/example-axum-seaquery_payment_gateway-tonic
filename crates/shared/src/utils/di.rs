@@ -1,4 +1,4 @@
-use anyhow::Context;
+use anyhow::{Context, Result};
 use prometheus_client::registry::Registry;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -52,7 +52,7 @@ impl DependenciesInject {
         jwt_config: DynJwtService,
         metrics: Arc<Mutex<Metrics>>,
         registry: &mut Registry,
-    ) -> Self {
+    ) -> Result<Self> {
         let config = RedisConfig {
             host: "redis".into(),
             port: 6379,
@@ -151,13 +151,13 @@ impl DependenciesInject {
             .await,
         ) as DynWithdrawService;
 
-        Self {
+        Ok(Self {
             auth_service,
             user_service,
             saldo_service,
             topup_service,
             transfer_service,
             withdraw_service,
-        }
+        })
     }
 }
