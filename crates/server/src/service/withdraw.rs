@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use genproto::api::ApiResponseEmpty;
 use genproto::withdraw::{
     ApiResponseWithdrawResponse, ApiResponsesWithdrawPaginated, ApiResponsesWithdrawResponse,
@@ -196,14 +195,10 @@ impl WithdrawService for WithdrawServiceImpl {
 
         let req = request.get_ref();
 
-        let withdraw_time = DateTime::parse_from_rfc3339(&req.withdraw_time)
-            .map_err(|e| Status::invalid_argument(format!("Invalid datetime: {e}")))?
-            .with_timezone(&Utc);
-
         let body = SharedCreateWithdrawRequest {
             user_id: req.user_id,
             withdraw_amount: req.withdraw_amount,
-            withdraw_time,
+            withdraw_time: req.withdraw_time.clone(),
         };
 
         match self
@@ -240,15 +235,11 @@ impl WithdrawService for WithdrawServiceImpl {
 
         let req = request.get_ref();
 
-        let withdraw_time = DateTime::parse_from_rfc3339(&req.withdraw_time)
-            .map_err(|e| Status::invalid_argument(format!("Invalid datetime: {e}")))?
-            .with_timezone(&Utc);
-
         let body = SharedUpdateWithdrawRequest {
             user_id: req.user_id,
             withdraw_id: req.withdraw_id,
             withdraw_amount: req.withdraw_amount,
-            withdraw_time,
+            withdraw_time: req.withdraw_time.clone(),
         };
 
         match self

@@ -8,6 +8,7 @@ use crate::{
 };
 use anyhow::Result;
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sea_query::{Expr, Func, Order, PostgresQueryBuilder, Query};
 use sea_query_binder::SqlxBinder;
 use tracing::{error, info};
@@ -270,7 +271,20 @@ impl WithdrawRepositoryTrait for WithdrawRepository {
             input.user_id, input.withdraw_amount, input.withdraw_time
         );
 
-        let withdraw_time_naive = input.withdraw_time.naive_utc();
+        let withdraw_time = DateTime::parse_from_rfc3339(&input.withdraw_time)
+            .map_err(|e| {
+                error!(
+                    "❌ [Withdraw] Invalid datetime string '{}': {}",
+                    input.withdraw_time, e
+                );
+                AppError::Custom(
+                    "Invalid datetime format. Use RFC3339 (e.g., 2024-01-01T12:00:00Z)."
+                        .to_string(),
+                )
+            })?
+            .with_timezone(&Utc);
+
+        let withdraw_time_naive = withdraw_time.naive_utc().into();
 
         let (sql, values) = Query::insert()
             .into_table(WithdrawSchema::Table)
@@ -282,22 +296,22 @@ impl WithdrawRepositoryTrait for WithdrawRepository {
             .values([
                 input.user_id.into(),
                 input.withdraw_amount.into(),
-                withdraw_time_naive.into(),
+                withdraw_time_naive,
             ])
             .unwrap()
             .returning_all()
             .build_sqlx(PostgresQueryBuilder);
 
         info!(
-            "🧾 [Withdraw] Executing INSERT: {} | Values: {:?}",
-            sql, values
+            "🧾 [Withdraw] Executing INSERT: {sql} | Values: {:?}",
+            values
         );
 
         let row = sqlx::query_as_with::<_, Withdraw, _>(&sql, values)
             .fetch_one(&self.db_pool)
             .await
             .map_err(|e| {
-                error!("❌ [Withdraw] Failed to create withdrawal: {}", e);
+                error!("❌ [Withdraw] Failed to create withdrawal: {e}");
                 AppError::SqlxError(e)
             })?;
 
@@ -315,13 +329,26 @@ impl WithdrawRepositoryTrait for WithdrawRepository {
             input.withdraw_id, input.withdraw_amount, input.withdraw_time
         );
 
-        let withdraw_time_naive = input.withdraw_time.naive_utc();
+        let withdraw_time = DateTime::parse_from_rfc3339(&input.withdraw_time)
+            .map_err(|e| {
+                error!(
+                    "❌ [Withdraw] Invalid datetime string '{}': {}",
+                    input.withdraw_time, e
+                );
+                AppError::Custom(
+                    "Invalid datetime format. Use RFC3339 (e.g., 2024-01-01T12:00:00Z)."
+                        .to_string(),
+                )
+            })?
+            .with_timezone(&Utc);
+
+        let withdraw_time_naive = withdraw_time.naive_utc().into();
 
         let (sql, values) = Query::update()
             .table(WithdrawSchema::Table)
             .values([
                 (WithdrawSchema::WithdrawAmount, input.withdraw_amount.into()),
-                (WithdrawSchema::WithdrawTime, withdraw_time_naive.into()),
+                (WithdrawSchema::WithdrawTime, withdraw_time_naive),
             ])
             .and_where(Expr::col(WithdrawSchema::WithdrawId).eq(input.withdraw_id))
             .build_sqlx(PostgresQueryBuilder);

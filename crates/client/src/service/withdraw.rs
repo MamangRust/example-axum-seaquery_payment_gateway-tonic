@@ -442,7 +442,7 @@ impl WithdrawServiceTrait for WithdrawService {
                 KeyValue::new("operation", "create"),
                 KeyValue::new("withdraw.user_id", input.user_id as i64),
                 KeyValue::new("withdraw.amount", input.withdraw_amount as i64),
-                KeyValue::new("withdraw.time", input.withdraw_time.timestamp()),
+                KeyValue::new("withdraw.time", input.withdraw_time.to_string()),
             ],
         );
 
@@ -516,7 +516,7 @@ impl WithdrawServiceTrait for WithdrawService {
         let withdraw_id = input.withdraw_id;
         let user_id = input.user_id;
         let withdraw_amount = input.withdraw_amount;
-        let withdraw_time = input.withdraw_time;
+        let withdraw_time = input.withdraw_time.clone();
 
         let tracing_ctx = self.start_tracing(
             "UpdateWithdraw",
@@ -526,7 +526,7 @@ impl WithdrawServiceTrait for WithdrawService {
                 KeyValue::new("withdraw.id", withdraw_id as i64),
                 KeyValue::new("withdraw.user_id", user_id as i64),
                 KeyValue::new("withdraw.amount", withdraw_amount as i64),
-                KeyValue::new("withdraw.time", withdraw_time.timestamp()),
+                KeyValue::new("withdraw.time", withdraw_time.to_string()),
             ],
         );
 
