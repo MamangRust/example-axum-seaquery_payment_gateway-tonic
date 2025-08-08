@@ -12,8 +12,6 @@ A modern, high-performance **payment gateway service** built in **Rust** using:
 
 ## 🧩 Teknologi & Arsitektur
 
-<div className="tech-grid">
-
 | Komponen | Teknologi |
 |--------|----------|
 | Backend | Rust (async) |
@@ -90,3 +88,27 @@ A modern, high-performance **payment gateway service** built in **Rust** using:
 #### Metrics Client
 
 <img src="./images/metrics_client.png" />
+
+
+## Loki
+
+<img src="./images/loki.png" />
+
+## Grafana Prometheus
+
+### Server Metrics
+
+<img src="./images/grafana-server.png"/>
+
+### Client Metrics
+
+<img src="./images/grafana-client.png" />
+
+## Node-Exporter
+
+<img src="./images/node-expoter.png" />
+
+## Otel-Collector
+
+<img src="./images/otel.png" />
+

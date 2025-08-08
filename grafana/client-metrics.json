@@ -1,0 +1,328 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 2,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "eeu9wqvidhywwa"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "eeu9wqvidhywwa"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by (handler, method, status) (\n  label_replace(\n    rate(user_handler_request_duration_sum[1m]), \n    \"handler\", \"Userhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(auth_handler_request_duration_sum[1m]), \n    \"handler\", \"Authhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(saldo_handler_request_duration_sum[1m]), \n    \"handler\", \"Saldohandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(category_handler_request_duration_sum[1m]), \n    \"handler\", \"Categoryhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(transfer_handler_request_duration_sum[1m]), \n    \"handler\", \"Transferhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(withdraw_handler_request_duration_sum[1m]), \n    \"handler\", \"Withdrawhandler\", \"\", \"\"\n  )\n)",
+                    "legendFormat": "__auto",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "Hitung rate sum dengan label handler",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "eeu9wqvidhywwa"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "eeu9wqvidhywwa"
+                    },
+                    "editorMode": "code",
+                    "expr": "sum by (handler, method, status) (\n  label_replace(\n    rate(user_handler_request_duration_count[1m]), \n    \"handler\", \"Userhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(auth_handler_request_duration_count[1m]), \n    \"handler\", \"Authhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(saldo_handler_request_duration_count[1m]), \n    \"handler\", \"Saldohandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(category_handler_request_duration_count[1m]), \n    \"handler\", \"Categoryhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(transfer_handler_request_duration_count[1m]), \n    \"handler\", \"Transferhandler\", \"\", \"\"\n  )\n) or\nsum by (handler, method, status) (\n  label_replace(\n    rate(withdraw_handler_request_duration_count[1m]), \n    \"handler\", \"Withdrawhandler\", \"\", \"\"\n  )\n)",
+                    "legendFormat": "__auto",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "Hitung rate count dengan label handler",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "eeu9wqvidhywwa"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 24,
+                "x": 0,
+                "y": 14
+            },
+            "id": 3,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "prometheus",
+                        "uid": "eeu9wqvidhywwa"
+                    },
+                    "editorMode": "code",
+                    "expr": " (\n  sum by (handler, method, status) (\n    label_replace(rate(user_handler_request_duration_sum[1m]), \"handler\", \"Userhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(auth_handler_request_duration_sum[1m]), \"handler\", \"Authhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(saldo_handler_request_duration_sum[1m]), \"handler\", \"Saldohandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(category_handler_request_duration_sum[1m]), \"handler\", \"Categoryhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(transfer_handler_request_duration_sum[1m]), \"handler\", \"Transferhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(withdraw_handler_request_duration_sum[1m]), \"handler\", \"Withdrawhandler\", \"\", \"\")\n  )\n)\n/\n(\n  sum by (handler, method, status) (\n    label_replace(rate(user_handler_request_duration_count[1m]), \"handler\", \"Userhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(auth_handler_request_duration_count[1m]), \"handler\", \"Authhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(saldo_handler_request_duration_count[1m]), \"handler\", \"Saldohandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(category_handler_request_duration_count[1m]), \"handler\", \"Categoryhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(transfer_handler_request_duration_count[1m]), \"handler\", \"Transferhandler\", \"\", \"\")\n  ) or\n  sum by (handler, method, status) (\n    label_replace(rate(withdraw_handler_request_duration_count[1m]), \"handler\", \"Withdrawhandler\", \"\", \"\")\n  )\n)",
+                    "legendFormat": "__auto",
+                    "range": true,
+                    "refId": "A"
+                }
+            ],
+            "title": "Rata-rata latency semua handler",
+            "type": "timeseries"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 41,
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Client - Metrics",
+    "uid": "e2eee94f-ac25-4c91-b8f1-4ab066484088",
+    "version": 7
+}
