@@ -135,3 +135,11 @@
 {"timestamp":"2025-08-08T00:22:11.010923Z","level":"INFO","fields":{"message":"Withdraw created successfully for user_id: 34"},"target":"shared::service::withdraw"}
 {"timestamp":"2025-08-08T00:22:11.010944Z","level":"INFO","fields":{"message":"Operation completed successfully: Withdraw created successfully"},"target":"shared::service::withdraw"}
 {"timestamp":"2025-08-08T00:22:11.010974Z","level":"INFO","fields":{"message":"Withdraw created successfully"},"target":"seaquery_server_payment_gateway::service::withdraw"}
+{"timestamp":"2025-08-08T02:46:07.782756Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-08-08T02:46:07.802091Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-08-08T02:46:07.803642Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-08-08T02:46:07.803782Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-08-08T02:47:17.778553Z","level":"INFO","fields":{"message":"relation \"_sqlx_migrations\" already exists, skipping"},"target":"sqlx::postgres::notice"}
+{"timestamp":"2025-08-08T02:47:17.793084Z","level":"INFO","fields":{"message":"Creating redis client"},"target":"shared::config::redis"}
+{"timestamp":"2025-08-08T02:47:17.794254Z","level":"INFO","fields":{"message":"Pinging redis"},"target":"shared::config::redis"}
+{"timestamp":"2025-08-08T02:47:17.794491Z","level":"INFO","fields":{"message":"Pinged redis"},"target":"shared::config::redis"}

@@ -1,5 +1,6 @@
 mod di;
 mod errors;
+mod gracefulshutdown;
 mod log;
 mod metadata;
 mod method_validator;
@@ -10,6 +11,7 @@ mod random_vcc;
 
 pub use self::di::DependenciesInject;
 pub use self::errors::AppError;
+pub use self::gracefulshutdown::shutdown_signal;
 pub use self::log::init_logger;
 pub use self::metadata::MetadataInjector;
 pub use self::metrics::{Method, Metrics, Status, SystemMetrics, run_metrics_collector};

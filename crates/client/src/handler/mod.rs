@@ -14,6 +14,7 @@ use axum::http::header::CONTENT_TYPE;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use prometheus_client::encoding::text::encode;
+use shared::utils::shutdown_signal;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::limit::RequestBodyLimitLayer;
@@ -151,7 +152,9 @@ impl AppRouter {
         println!("API Documentation available at:");
         println!("- Swagger UI: http://localhost:{port}/swagger-ui");
 
-        axum::serve(listener, app).await?;
+        axum::serve(listener, app)
+            .with_graceful_shutdown(shutdown_signal())
+            .await?;
         Ok(())
     }
 }

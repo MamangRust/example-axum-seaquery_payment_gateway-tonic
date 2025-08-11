@@ -17,7 +17,7 @@ use prometheus_client::encoding::text::encode;
 use shared::{
     config::{Config, ConnectionManager},
     state::AppState,
-    utils::{Telemetry, init_logger},
+    utils::{Telemetry, init_logger, shutdown_signal},
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
             .add_service(TopupServiceServer::new(service_topup))
             .add_service(TransferServiceServer::new(service_transfer))
             .add_service(WithdrawServiceServer::new(service_withdraw))
-            .serve(grpc_addr)
+            .serve_with_shutdown(grpc_addr, shutdown_signal())
             .await
             .context("Failed to start gRPC server")
     });
@@ -104,16 +104,16 @@ async fn main() -> Result<()> {
     println!("gRPC Server running on 0.0.0.0:50051");
     println!("Metrics Server running on http://0.0.0.0:8080");
 
-    let axum_server = tokio::spawn(async move {
-        axum::serve(listener, app)
-            .await
-            .context("axum server failed")
-    });
+    let axum_server = axum::serve(listener, app).with_graceful_shutdown(shutdown_signal());
 
-    let (grpc_result, axum_result) = tokio::try_join!(grpc_server, axum_server)?;
+    println!("🚀 gRPC Server running on 0.0.0.0:50051");
+    println!("📊 Metrics Server running on http://0.0.0.0:8080");
 
-    grpc_result.context("gRPC server failed")?;
-    axum_result.context("Axum server failed")?;
+    let grpc_handle = tokio::spawn(async { grpc_server.await.context("gRPC server failed") });
+
+    let axum_handle = tokio::spawn(async { axum_server.await.context("Axum server failed") });
+
+    let (_grpc_result, _axum_result) = tokio::try_join!(grpc_handle, axum_handle)?;
 
     let mut shutdown_errors = Vec::new();
 
