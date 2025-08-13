@@ -20,8 +20,11 @@ use shared::{
     utils::{Telemetry, init_logger, shutdown_signal},
 };
 use std::sync::Arc;
-use tokio::net::TcpListener;
+use tracing::{error, info};
 
+use crate::{config::ServerConfig, service::ServiceContainer};
+
+mod config;
 mod service;
 
 pub async fn metrics_handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
@@ -50,89 +53,84 @@ pub async fn metrics_handler(State(state): State<Arc<AppState>>) -> impl IntoRes
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
 
-    let mytelemetry = Telemetry::new("myserver");
-    let tracer_provider = mytelemetry.init_tracer();
-    let meter_provider = mytelemetry.init_meter();
-    let logger_provider = mytelemetry.init_logger();
+    let telemetry = Telemetry::new("myserver");
+    let logger_provider = telemetry.init_logger();
 
     init_logger(logger_provider.clone(), "server");
 
-    let config = Config::init().context("Failed to load configuration")?;
+    info!("Starting server initialization...");
 
-    let db_pool = ConnectionManager::new_pool(&config.database_url, config.run_migrations)
-        .await
-        .context("Failed to initialize database pool")?;
+    let config = Config::init().context("Failed to load configuration")?;
+    let server_config = ServerConfig::from_config(&config)?;
+
+    let db_pool =
+        ConnectionManager::new_pool(&server_config.database_url, server_config.run_migrations)
+            .await
+            .context("Failed to initialize database pool")?;
 
     let state = Arc::new(
-        AppState::new(db_pool, &config.jwt_secret)
+        AppState::new(db_pool, &server_config.jwt_secret)
             .await
             .context("Failed to create AppState")?,
     );
 
-    let service_auth = service::auth::AuthServiceImpl::new(state.clone());
-    let service_user = service::user::UserServiceImpl::new(state.clone());
-    let service_topup = service::topup::TopupServiceImpl::new(state.clone());
-    let service_saldo = service::saldo::SaldoServiceImpl::new(state.clone());
-    let service_transfer = service::transfer::TransferServiceImpl::new(state.clone());
-    let service_withdraw = service::withdraw::WithdrawServiceImpl::new(state.clone());
+    let services = ServiceContainer::new(state.clone());
 
-    let grpc_addr = "0.0.0.0:50051"
-        .parse()
-        .context("Failed to parse gRPC address")?;
+    let server_result = tokio::try_join!(
+        start_grpc_server(services, server_config.grpc_addr),
+        start_metrics_server(state, server_config.metrics_addr)
+    );
 
-    let grpc_server = tokio::spawn(async move {
-        tonic::transport::Server::builder()
-            .add_service(AuthServiceServer::new(service_auth))
-            .add_service(UserServiceServer::new(service_user))
-            .add_service(SaldoServiceServer::new(service_saldo))
-            .add_service(TopupServiceServer::new(service_topup))
-            .add_service(TransferServiceServer::new(service_transfer))
-            .add_service(WithdrawServiceServer::new(service_withdraw))
-            .serve_with_shutdown(grpc_addr, shutdown_signal())
-            .await
-            .context("Failed to start gRPC server")
-    });
+    match server_result {
+        Ok(_) => info!("Servers started successfully"),
+        Err(e) => {
+            error!("Server startup failed: {}", e);
+            if let Err(shutdown_err) = telemetry.shutdown().await {
+                error!("Failed to shutdown telemetry: {}", shutdown_err);
+            }
+            return Err(e);
+        }
+    }
+
+    info!("Shutting down servers...");
+    telemetry.shutdown().await?;
+
+    Ok(())
+}
+
+async fn start_grpc_server(services: ServiceContainer, addr: std::net::SocketAddr) -> Result<()> {
+    info!("Starting gRPC server on {}", addr);
+
+    tonic::transport::Server::builder()
+        .add_service(AuthServiceServer::new(services.auth))
+        .add_service(UserServiceServer::new(services.user))
+        .add_service(SaldoServiceServer::new(services.saldo))
+        .add_service(TopupServiceServer::new(services.topup))
+        .add_service(TransferServiceServer::new(services.transfer))
+        .add_service(WithdrawServiceServer::new(services.withdraw))
+        .serve_with_shutdown(addr, shutdown_signal())
+        .await
+        .with_context(|| format!("gRPC server failed on {addr}"))
+}
+
+async fn start_metrics_server(state: Arc<AppState>, addr: std::net::SocketAddr) -> Result<()> {
+    info!("Starting metrics server on {}", addr);
 
     let app = Router::new()
         .route("/metrics", axum::routing::get(metrics_handler))
+        .route("/health", axum::routing::get(health_check))
         .with_state(state);
 
-    let listener = TcpListener::bind("0.0.0.0:8080")
+    let listener = tokio::net::TcpListener::bind(addr)
         .await
-        .context("Failed to bind Axum metrics listener")?;
+        .with_context(|| format!("Failed to bind metrics listener on {addr}"))?;
 
-    println!("gRPC Server running on 0.0.0.0:50051");
-    println!("Metrics Server running on http://0.0.0.0:8080");
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .with_context(|| format!("Metrics server failed on {addr}"))
+}
 
-    let axum_server = axum::serve(listener, app).with_graceful_shutdown(shutdown_signal());
-
-    println!("🚀 gRPC Server running on 0.0.0.0:50051");
-    println!("📊 Metrics Server running on http://0.0.0.0:8080");
-
-    let grpc_handle = tokio::spawn(async { grpc_server.await.context("gRPC server failed") });
-
-    let axum_handle = tokio::spawn(async { axum_server.await.context("Axum server failed") });
-
-    let (_grpc_result, _axum_result) = tokio::try_join!(grpc_handle, axum_handle)?;
-
-    let mut shutdown_errors = Vec::new();
-
-    if let Err(e) = tracer_provider.shutdown() {
-        shutdown_errors.push(format!("tracer provider: {e}"));
-    }
-    if let Err(e) = meter_provider.shutdown() {
-        shutdown_errors.push(format!("meter provider: {e}"));
-    }
-    if let Err(e) = logger_provider.shutdown() {
-        shutdown_errors.push(format!("logger provider: {e}"));
-    }
-
-    if !shutdown_errors.is_empty() {
-        anyhow::bail!(
-            "Failed to shutdown providers:\n{}",
-            shutdown_errors.join("\n")
-        );
-    }
-
-    Ok(())
+async fn health_check() -> &'static str {
+    "OK"
 }

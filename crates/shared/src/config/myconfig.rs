@@ -6,6 +6,8 @@ pub struct Config {
     pub jwt_secret: String,
     pub run_migrations: bool,
     pub port: u16,
+    pub grpc_port: u16,
+    pub metric_port: u16,
 }
 
 impl Config {
@@ -32,15 +34,29 @@ impl Config {
             }
         };
 
+        let grpc_port_str =
+            std::env::var("GRPC_PORT").context("Missing environment variable: GRPC_PORT")?;
+        let metrics_port_str =
+            std::env::var("METRIC_PORT").context("Missing environment variable: METRIC_PORT")?;
+
         let port = port_str
             .parse::<u16>()
             .context("PORT must be a valid u16 integer")?;
+
+        let grpc_port = grpc_port_str
+            .parse::<u16>()
+            .context("GRPC_PORT must be a valid u16 integer")?;
+        let metric_port = metrics_port_str
+            .parse::<u16>()
+            .context("METRIC_PORT must be a valid u16 integer")?;
 
         Ok(Self {
             database_url,
             jwt_secret,
             run_migrations,
             port,
+            grpc_port,
+            metric_port,
         })
     }
 }

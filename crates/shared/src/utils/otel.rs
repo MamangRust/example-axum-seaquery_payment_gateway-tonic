@@ -1,5 +1,6 @@
 use std::sync::OnceLock;
 
+use anyhow::Result;
 use opentelemetry::{Context, global};
 use opentelemetry_otlp::{LogExporter, MetricExporter, SpanExporter, WithExportConfig};
 use opentelemetry_sdk::{
@@ -80,5 +81,25 @@ impl Telemetry {
             .with_resource(self.get_resource())
             .with_batch_exporter(exporter)
             .build()
+    }
+
+    pub async fn shutdown(self) -> Result<()> {
+        let mut errors = Vec::new();
+
+        if let Err(e) = self.init_tracer().shutdown() {
+            errors.push(format!("tracer provider: {e}"));
+        }
+        if let Err(e) = self.init_meter().shutdown() {
+            errors.push(format!("meter provider: {e}"));
+        }
+        if let Err(e) = self.init_logger().shutdown() {
+            errors.push(format!("logger provider: {e}"));
+        }
+
+        if !errors.is_empty() {
+            anyhow::bail!("Failed to shutdown providers:\n{}", errors.join("\n"));
+        }
+
+        Ok(())
     }
 }

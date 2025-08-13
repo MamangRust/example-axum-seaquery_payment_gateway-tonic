@@ -5,6 +5,7 @@ use shared::{
     config::Config,
     utils::{Telemetry, init_logger},
 };
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -12,8 +13,6 @@ async fn main() -> Result<()> {
 
     let telemetry = Telemetry::new("myclient");
 
-    let tracer_provider = telemetry.init_tracer();
-    let meter_provider = telemetry.init_meter();
     let logger_provider = telemetry.init_logger();
 
     init_logger(logger_provider.clone(), "client");
@@ -32,24 +31,9 @@ async fn main() -> Result<()> {
         .await
         .context("Failed to start server")?;
 
-    let mut shutdown_errors = Vec::new();
+    info!("Shutting down servers...");
 
-    if let Err(e) = tracer_provider.shutdown() {
-        shutdown_errors.push(format!("tracer provider: {e}"));
-    }
-    if let Err(e) = meter_provider.shutdown() {
-        shutdown_errors.push(format!("meter provider: {e}"));
-    }
-    if let Err(e) = logger_provider.shutdown() {
-        shutdown_errors.push(format!("logger provider: {e}"));
-    }
-
-    if !shutdown_errors.is_empty() {
-        anyhow::bail!(
-            "Failed to shutdown providers:\n{}",
-            shutdown_errors.join("\n")
-        );
-    }
+    telemetry.shutdown().await?;
 
     Ok(())
 }
