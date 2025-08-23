@@ -154,7 +154,8 @@ impl AppRouter {
 
         axum::serve(listener, app)
             .with_graceful_shutdown(shutdown_signal())
-            .await?;
+            .await
+            .unwrap();
         Ok(())
     }
 }

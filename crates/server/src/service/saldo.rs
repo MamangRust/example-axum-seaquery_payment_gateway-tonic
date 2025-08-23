@@ -16,6 +16,7 @@ use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::{error, info};
 
+#[derive(Debug, Clone)]
 pub struct SaldoServiceImpl {
     state: Arc<AppState>,
 }

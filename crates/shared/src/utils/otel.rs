@@ -11,6 +11,7 @@ use tokio::time::Instant;
 #[derive(Clone)]
 pub struct Telemetry {
     service_name: String,
+    otel_endpoint: String,
 }
 
 pub struct TracingContext {
@@ -19,9 +20,10 @@ pub struct TracingContext {
 }
 
 impl Telemetry {
-    pub fn new(service_name: impl Into<String>) -> Self {
+    pub fn new(service_name: impl Into<String>, otel_endpoint: String) -> Self {
         Self {
             service_name: service_name.into(),
+            otel_endpoint,
         }
     }
 
@@ -39,7 +41,7 @@ impl Telemetry {
     pub fn init_tracer(&self) -> SdkTracerProvider {
         let exporter = SpanExporter::builder()
             .with_tonic()
-            .with_endpoint("http://otel-collector:4317")
+            .with_endpoint(self.otel_endpoint.clone())
             .build()
             .expect("Failed to create span exporter");
 
@@ -56,7 +58,7 @@ impl Telemetry {
     pub fn init_meter(&self) -> SdkMeterProvider {
         let exporter = MetricExporter::builder()
             .with_tonic()
-            .with_endpoint("http://otel-collector:4317")
+            .with_endpoint(self.otel_endpoint.clone())
             .build()
             .expect("Failed to create metric exporter");
 
@@ -73,7 +75,7 @@ impl Telemetry {
     pub fn init_logger(&self) -> SdkLoggerProvider {
         let exporter = LogExporter::builder()
             .with_tonic()
-            .with_endpoint("http://otel-collector:4317")
+            .with_endpoint(self.otel_endpoint.clone())
             .build()
             .expect("Failed to create log exporter");
 

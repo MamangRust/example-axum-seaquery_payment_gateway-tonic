@@ -16,6 +16,7 @@ use self::transfer::TransferServiceImpl;
 use self::user::UserServiceImpl;
 use self::withdraw::WithdrawServiceImpl;
 
+#[derive(Clone)]
 pub struct ServiceContainer {
     pub auth: AuthServiceImpl,
     pub user: UserServiceImpl,

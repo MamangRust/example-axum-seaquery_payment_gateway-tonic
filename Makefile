@@ -7,7 +7,6 @@ clipy:
 fmt:
 	cargo fmt --all -- --check
 
-
 build-client:
 	cargo build --release --target x86_64-unknown-linux-musl --package seaquery_client_payment_gateway
 
